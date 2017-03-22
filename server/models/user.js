@@ -9,68 +9,85 @@ let UserSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
-        minlength: 8,
+        required: [true, 'Please provide an email'],
+        minlength: [8, 'Please provide a valid email'],
         trim: true,
-        unique: true
+        unique: [true, 'This email already exists!'],
+        validate: {
+            validator: validator.isEmail,
+            message: '{VALUE} is not a valid email'
+        }
     },
     //password is null if OAuth
     password: {
         type: String,
+        minlength: [8, 'Please make your password longer than 8 characters long'],
+        maxlength: [20, 'Please make your password shorter than 20 characters long'],
         default: null
     },
     name: {
         first: {
             type: String,
-            min: 1,
-            max: 20,
+            min: [1, 'Please provide a valid name'],
+            max: [20, 'Please provide a valid name'],
             trim: true,
-            required: true
+            required: [true, 'Please provide a name']
         },
         last: {
             type: String,
-            min: 1,
-            max: 20,
+            min: [1, 'Please provide a valid name'],
+            max: [20, 'Please provide a valid name'],
             trim: true,
-            required: true
+            required: [true, 'Please provide a name']
         }
     },
     age: {
         type: Number,
-        required: true
+        min: [12, 'You must be older than 12'],
+        max: [120, 'Please provide a valid age'],
+        required: [true, 'Please provide an age']
     },
     status: {
         type: String,
-        minlength: 1,
-        maxlength: 100,
+        minlength: [1, 'Please provide a status'],
+        maxlength: [200, "Your status can't be more than 200 characters long"],
         default: null,
         trim: true
     },
     summary: {
         type: String,
-        minlength: 1,
-        maxlength: 100,
+        minlength: [1, 'Please provide a summary'],
+        maxlength: [300, "Your summary can't be more than 300 characters long"],
         default: null,
         trim: true
     },
-    occupation: {
+    profession: {
         type: String,
-        minlength: 1,
-        maxlength: 20,
+        minlength: [1, 'Please provide where your profession'],
+        maxlength: [30, 'Please provide a valid profession'],
         default: null,
         trim: true
 
     },
+    work: {
+        type: String,
+        minlength: [1, 'Please provide where you work at'],
+        maxlength: [30, 'Please provide a valid workplace'],
+        default: null,
+        trim: true
+    },
     skills: [{
         type: String,
+        minlength: [1, 'Please provide a skill'],
+        maxlength: [20, 'Please provide a valid skill'],
         trim: true
     }],
     experiences: [{
         name: {
             type: String,
-            minlength: 1,
+            minlength: [1, 'Please provide an experience'],
+            maxlength: [30, 'Please provide a valid experience name'],
             required: true,
-            maxlength: 30,
             trim: true
         },
         start: {
@@ -83,7 +100,8 @@ let UserSchema = new mongoose.Schema({
         },
         description: {
             type: String,
-            maxlength: 100,
+            minlength: [1, 'Please provide the experience description'],
+            maxlength: [100, 'Please keep your experience description shorter than 100 characters'],
             trim: true
         }
     }],

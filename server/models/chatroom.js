@@ -12,7 +12,7 @@ let Chatroom = mongoose.model('Chatroom', {
         required: true
     }],
     lastMessage: {
-        type: mongoose.Schema.Types.ObjectId,        
+        type: mongoose.Schema.Types.ObjectId,
     }
 });
 

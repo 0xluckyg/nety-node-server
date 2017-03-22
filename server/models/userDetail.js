@@ -6,12 +6,12 @@ let UserDetail = mongoose.model('UserDetail', {
             type: mongoose.Schema.Types.ObjectId,
             required: true
         },
-        notification: {
+        unread: {
             type: Number,
             default: 0
         }
     }],
-    friends: [{
+    contacts: [{
         type: mongoose.Schema.Types.ObjectId,
         required: true
     }],

@@ -12,8 +12,8 @@ let Message = mongoose.model('Messages', {
     },
     text: {
         type: String,
-        minlength: 1,
-        maxlength: 1000,
+        minlength: [1, 'Please provide a message'],
+        maxlength: [1000, 'Please keep your message shorter than 1000 characters'],
         trim: true,
         required: true
     },

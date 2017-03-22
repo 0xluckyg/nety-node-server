@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-let UserDetail = mongoose.model('UserDetail', {
+let UserProperty = mongoose.model('UserDetail', {
     chatrooms: [{
         chatroomID: {
             type: mongoose.Schema.Types.ObjectId,
@@ -21,4 +21,4 @@ let UserDetail = mongoose.model('UserDetail', {
     }]
 });
 
-module.exports = {UserDetail};
+module.exports = {UserProperty};

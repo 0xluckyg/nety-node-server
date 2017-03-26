@@ -12,12 +12,10 @@ let UserSchema = new mongoose.Schema({
     },
     tokens: [{
         access: {
-            type: String,
-            required: true
+            type: String
         },
         token: {
-            type: String,
-            required: true
+            type: String
         }
     }],
 
@@ -28,6 +26,7 @@ let UserSchema = new mongoose.Schema({
         trim: true,
         unique: [true, 'This email already exists!'],
         validate: {
+            isAsync: true,
             validator: validator.isEmail,
             message: '{VALUE} is not a valid email'
         }

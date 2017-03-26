@@ -1,6 +1,6 @@
 require('./config/config');
 const path = require('path');
-const https = require('https');
+const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
@@ -17,16 +17,36 @@ const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT;
 
 var app = express();
-const server = https.createServer(app);
-const io = socketIO(server);
-
 app.use(bodyParser.json());
 app.use(express.static(publicPath));
 
+app.post('/signup', function (req, res) {
+    console.log(req.body)
+    let body = _.pick(req.body, ['age', 'name', 'email', 'password']);
+    let user = new User(body);
+
+    user.save().then(() => {
+        return user.generateAuthToken();
+    }).then((token) => {
+        console.log(token)
+        console.log(user)
+        res.header('x-auth', token).send(user);
+    }).catch((err) => {
+        console.log(err)
+        res.status(400).send(JSON.stringify(err));
+    })
+});
+
+const server = http.createServer(app);
+const io = socketIO(server);
+
 io.on('connection', (socket) => {
+    // console.log('client connected');
 
-    socket.on('user.create', (data) => {
-
+    socket.on('user.signup', (data) => {
+        // console.log(data);
+        // console.log(socket.handshake)
+        socket.emit('message', 'user signup called');
     })
 
     socket.on('user.get', (token) => {
@@ -34,26 +54,16 @@ io.on('connection', (socket) => {
     })
 
     socket.on('user.login', (data) => {
-        let data = _.pick(data, ['email', 'password']);
 
-        User.findByCredentials(data.email, data.password).then((user) => {
-            return user.generateAuthToken().then((token) => {
-                user.token = token;
-                socket.emit('user.login.success', user);
-            });
-        }).catch((err) => {
-            socket.emit('user.login.fail', err);
-        })
     })
 
     socket.on('user.logout', (token) => {
 
     })
-
 })
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log('Started on port: ', port);
 });
 
-module.exports = {app}
+module.exports = {server}

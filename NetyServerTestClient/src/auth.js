@@ -32,11 +32,16 @@ class Auth extends Component {
             res: 'Did not send yet'
         }
 
-        this.onSend = this.onSend.bind(this);
+        this.onSignup = this.onSignup.bind(this);
+		this.onLogin = this.onLogin.bind(this);
     }
 
-    onSend() {
+    onSignup() {
         hub.signup(this.state);
+    }
+
+	onLogin() {
+        hub.login(this.state);
     }
 
     connectSocket() {
@@ -45,7 +50,8 @@ class Auth extends Component {
 
     render() {
         return(
-            <View style={styles.cellStyle}>
+            <ScrollView style={styles.cellStyle}>
+				<Text>SIGNUP</Text>
                 <TextInput
                     value={this.state.age}
                     onChangeText={(age) => this.setState({age})}
@@ -76,23 +82,44 @@ class Auth extends Component {
                     style={styles.cellTextInputStyle}
                     placeholder={'password'}>
                 </TextInput>
-                <TouchableOpacity onPress={() => this.onSend()}>
+                <TouchableOpacity onPress={() => this.onSignup()}>
                     <Text>SEND</Text>
                 </TouchableOpacity>
-                <Text>{this.state.res}</Text>
-			</View>
+
+				<View style={styles.separator}></View>
+
+				<Text>LOGIN</Text>
+                <TextInput
+                    value={this.state.email}
+                    onChangeText={(email) => this.setState({email})}
+                    style={styles.cellTextInputStyle}
+                    placeholder={'email'}>
+				</TextInput>
+                <TextInput
+                    value={this.state.password}
+                    onChangeText={(password) => this.setState({password})}
+                    style={styles.cellTextInputStyle}
+                    placeholder={'password'}>
+				</TextInput>
+				<TouchableOpacity onPress={() => this.onLogin()}>
+                    <Text>SEND</Text>
+                </TouchableOpacity>
+			</ScrollView>
         )
     }
 }
 
 const styles = StyleSheet.create({
     cellStyle: {
-        height: 50,
-        width: 300,
-        marginTop: 120
+        flex: 1,
+		paddingTop: 70
+	},
+	separator: {
+		height: 30
 	},
     cellTextInputStyle: {
         height: 50,
+		width: 300,
         paddingLeft: 15,
         marginBottom: 5,
         borderWidth: 0.7,

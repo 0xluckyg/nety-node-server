@@ -24,12 +24,21 @@ const Auth = {
     },
 
     login: function(state, callback) {
-        axios.post(`${url}/login`,
+        let response = {
+            success: true,
+            data: ''
+        };
+        axios.post(`${keys.SERVER}/login`,
             _.pick(state, ['email', 'password'])
         ).then((res) => {
-
+            response.data = res.headers['x-auth'];
+            callback(response)
         }).catch((err) => {
-
+            response.success = false;
+            if (err.response != undefined) {
+                response.data = err.response.data
+            }
+            callback(response)
         })
     }
 }

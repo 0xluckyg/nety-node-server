@@ -35,8 +35,7 @@ let UserSchema = new mongoose.Schema({
     //password is null if OAuth
     password: {
         type: String,
-        minlength: [8, 'Please make your password longer than 8 characters'],
-        maxlength: [20, 'Please make your password shorter than 20 characters'],
+        minlength: [8, 'Please make your password longer than 8 characters'],        
         default: null
     },
     name: {
@@ -197,19 +196,36 @@ UserSchema.statics.findByCredentials = function(email, password) {
 
     return User.findOne({email}).then((user) => {
         if (!user) {
-            return Promise.reject();
+            return Promise.reject("This email does not exist!");
         }
         return new Promise((resolve, reject) => {
             bcrypt.compare(password, user.password, (err, res) => {
                 if (res) {
                     resolve(user);
                 } else {
-                    reject();
+                    reject('Invalid password!');
                 }
             })
         })
     })
 }
+
+//Run middleware before 'save' operation
+UserSchema.pre('save', function(next) {
+    let user = this;
+
+    //Checks if password was modified
+    if (user.isModified('password')) {
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(user.password, salt, (err, hash) => {
+                user.password = hash;
+                next();
+            })
+        })
+    } else {
+        next();
+    }
+})
 
 //Creating a new user example
 let User = mongoose.model('User', UserSchema);

@@ -8,8 +8,6 @@ const Socket = {
             'query': 'token=' + token
         });
 
-        
-
         socket.on('connect', () => {
             console.log('it connected')
         })

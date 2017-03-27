@@ -19,19 +19,31 @@ export default class NetyServerTestClient extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Auth/>
-                <Logger/>
+                <View>
+                    <Auth/>
+                </View>
+                <View style={styles.logger}>
+                    <Logger/>
+                </View>
             </View>
         );
     }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF'
-  }
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        backgroundColor: '#F5FCFF'
+    },
+    logger: {
+        paddingTop: 750,
+
+        position: 'absolute',
+
+        backgroundColor: 'red'
+    }
+
 });
 
 AppRegistry.registerComponent('NetyServerTestClient', () => NetyServerTestClient);

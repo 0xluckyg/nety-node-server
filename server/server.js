@@ -23,7 +23,6 @@ app.use(bodyParser.json());
 app.use(express.static(publicPath));
 
 app.post('/signup', function (req, res) {
-    console.log(req.body)
     let body = _.pick(req.body, ['age', 'name', 'email', 'password']);
     let user = new User(body);
 
@@ -41,10 +40,25 @@ app.post('/signup', function (req, res) {
     })
 });
 
+app.post('/login', function (req, res) {
+    let body = _.pick(req.body, ['email', 'password']);
+    let user = new User(body);
+    console.log(body)
+    User.findByCredentials(body.email, body.password).then((user) => {
+        return user.generateAuthToken().then((token) => {
+            res.header('x-auth', token).send(user);
+            console.log('loginsuccess')
+        });
+    }).catch((err) => {
+        res.status(400).send(err);
+        console.log(`login fail with err ${err}`)
+    })
+});
+
 const server = http.createServer(app);
 const io = socketIO(server);
 
-io.set('authorization', socketioJwt.authorize({  
+io.set('authorization', socketioJwt.authorize({
   secret: process.env.JWT_SECRET,
   handshake: true
 }));

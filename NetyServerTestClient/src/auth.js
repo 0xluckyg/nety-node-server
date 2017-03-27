@@ -104,6 +104,19 @@ class Auth extends Component {
 				<TouchableOpacity onPress={() => this.onLogin()}>
                     <Text>SEND</Text>
                 </TouchableOpacity>
+
+				<View style={styles.separator}></View>
+
+				<Text>FB AUTH</Text>
+
+
+				<View style={styles.separator}></View>
+
+				<Text>LINKEDIN AUTH</Text>
+
+				<View style={styles.separator}></View>
+				<View style={styles.separator}></View>
+				<View style={styles.separator}></View>
 			</ScrollView>
         )
     }
@@ -112,7 +125,7 @@ class Auth extends Component {
 const styles = StyleSheet.create({
     cellStyle: {
         flex: 1,
-		paddingTop: 70
+		paddingTop: 70,		
 	},
 	separator: {
 		height: 30

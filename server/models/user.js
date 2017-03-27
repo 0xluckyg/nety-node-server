@@ -35,7 +35,7 @@ let UserSchema = new mongoose.Schema({
     //password is null if OAuth
     password: {
         type: String,
-        minlength: [8, 'Please make your password longer than 8 characters'],        
+        minlength: [8, 'Please make your password longer than 8 characters'],
         default: null
     },
     name: {
@@ -213,7 +213,6 @@ UserSchema.statics.findByCredentials = function(email, password) {
 //Run middleware before 'save' operation
 UserSchema.pre('save', function(next) {
     let user = this;
-
     //Checks if password was modified
     if (user.isModified('password')) {
         bcrypt.genSalt(10, (err, salt) => {

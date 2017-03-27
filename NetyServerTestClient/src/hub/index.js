@@ -2,11 +2,14 @@ import Authorization from './authorization';
 import SocketManager from './socketManager';
 
 
-const hub = {
+const Hub = {
+    //res has two properties:
+        //success: whether the request succeeded or not
+        //data: token or error
+        
     signup: function(user) {
         Authorization.signup(user, (res) => {
             if (res.success) {
-                //Data is the token
                 SocketManager.connect(res.data)
                 console.log(`signup successful with token: ${res.data}`)
             } else {
@@ -17,7 +20,6 @@ const hub = {
     login: function(user) {
         Authorization.login(user, (res) => {
             if (res.success) {
-                //Data is the token
                 SocketManager.connect(res.data)
                 console.log(`signin successful with token: ${res.data}`)
             } else {
@@ -27,4 +29,4 @@ const hub = {
     },
 }
 
-export default hub;
+export default Hub;

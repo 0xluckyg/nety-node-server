@@ -1,8 +1,8 @@
 const {User} = require('../../models/user');
+const socketioJwt = require('socketio-jwt');
 
-//middleware
-let authenticate = (token) => {
-    User.findByToken(token).then((user) => {   
+let authenticateUserToken = (token) => {
+    User.findByToken(token).then((user) => {
         if (!user) {
             return Promise.reject();
         }
@@ -15,6 +15,9 @@ let authenticate = (token) => {
     });
 }
 
-module.exports = {
-    authenticate: authenticate
-}
+let authenticateToken = socketioJwt.authorize({
+    secret: process.env.JWT_SECRET,
+    handshake: true
+})
+
+module.exports = {authenticateUserToken, authenticateToken}

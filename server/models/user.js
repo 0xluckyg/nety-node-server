@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+var uniqueValidator = require('mongoose-unique-validator');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -24,7 +25,7 @@ let UserSchema = new mongoose.Schema({
         required: [true, 'Please provide an email'],
         minlength: [8, 'Please provide a valid email'],
         trim: true,
-        unique: [true, 'This email already exists!'],
+        unique: true,
         validate: {
             isAsync: true,
             validator: validator.isEmail,
@@ -34,8 +35,8 @@ let UserSchema = new mongoose.Schema({
     //password is null if OAuth
     password: {
         type: String,
-        minlength: [8, 'Please make your password longer than 8 characters long'],
-        maxlength: [20, 'Please make your password shorter than 20 characters long'],
+        minlength: [8, 'Please make your password longer than 8 characters'],
+        maxlength: [20, 'Please make your password shorter than 20 characters'],
         default: null
     },
     name: {
@@ -134,6 +135,7 @@ let UserSchema = new mongoose.Schema({
         default: true
     }
 });
+UserSchema.plugin(uniqueValidator, { message: 'This email is taken. Please try another email' });
 
 //Overrides original toJSON. called in JSON.stringify when sending
 UserSchema.methods.toJSON = function() {

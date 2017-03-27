@@ -6,12 +6,14 @@ const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
 const {ObjectID} = require('mongodb');
+const socketioJwt = require('socketio-jwt');
 
 const mongoose = require('./db/mongoose');
 const {User} = require('./models/user');
 const {UserProperty} = require('./models/UserProperty');
 const {message} = require('./models/message');
 const {chatroom} = require('./models/chatroom');
+const {authenticate} = require('./util/middleware/authenticate');
 
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT;
@@ -28,21 +30,27 @@ app.post('/signup', function (req, res) {
     user.save().then(() => {
         return user.generateAuthToken();
     }).then((token) => {
-        console.log(token)
-        console.log(user)
         res.header('x-auth', token).send(user);
     }).catch((err) => {
-        console.log(err)
-        res.status(400).send(JSON.stringify(err));
+        if (err.errors != undefined) {
+            let errorMessage = err.errors[Object.keys(err.errors)[0]].message;
+            res.status(400).send(errorMessage);
+        } else {
+            res.status(400).send(JSON.stringify(err));
+        }
     })
 });
 
 const server = http.createServer(app);
 const io = socketIO(server);
 
-io.on('connection', (socket) => {
-    // console.log('client connected');
+io.set('authorization', socketioJwt.authorize({  
+  secret: process.env.JWT_SECRET,
+  handshake: true
+}));
 
+io.on('connection', (socket) => {
+    console.log(socket.handshake.query.token)
     socket.on('user.signup', (data) => {
         // console.log(data);
         // console.log(socket.handshake)

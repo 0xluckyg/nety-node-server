@@ -23,7 +23,9 @@
     "moment": "^2.18.1",
     "mongodb": "^2.2.25",
     "mongoose": "^4.9.1",
+    "mongoose-unique-validator": "^1.0.5",
     "socket.io": "^1.7.3",
+    "socketio-jwt": "^4.5.0",
     "validator": "^7.0.0"
   },
   "devDependencies": {

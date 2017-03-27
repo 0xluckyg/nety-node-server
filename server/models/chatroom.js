@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 //Creating a new todo example
 let Chatroom = mongoose.model('Chatroom', {
     name: {
-        type: String,
+        type: String,        
         trim: true,
         required: true
     },

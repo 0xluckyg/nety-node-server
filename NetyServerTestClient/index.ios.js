@@ -12,6 +12,7 @@ import {
   View
 } from 'react-native';
 import Logger from 'react-native-logger-client'
+import App from './src/app'
 
 import Auth from './src/auth';
 
@@ -33,7 +34,6 @@ export default class NetyServerTestClient extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
         backgroundColor: '#F5FCFF'
     },
     logger: {

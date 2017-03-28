@@ -13,6 +13,7 @@ import {
 import SocketIOClient from 'socket.io-client';
 import _ from 'lodash';
 import axios from 'axios';
+import RandomString from 'random-string';
 
 import hub from './hub';
 
@@ -21,19 +22,19 @@ class Auth extends Component {
         super(props);
 
         this.state = {
-            age: '12',
+            age: '30',
             name: {
-                first: 'Scott',
-                last: 'Cho'
+                first: RandomString({length: 5}),
+                last: RandomString({length: 5})
             },
-            email: 'heyscott96@gmail.com',
-            password: 'Somepwisthispw',
-            message: 'yo',
-            res: 'Did not send yet'
+            email: RandomString({length: 5}) + '@gmail.com',
+            password: RandomString({length: 8}),
         }
 
         this.onSignup = this.onSignup.bind(this);
 		this.onLogin = this.onLogin.bind(this);
+		this.onFacebook = this.onFacebook.bind(this);
+		this.onLinkedin = this.onLinkedin.bind(this);
     }
 
     onSignup() {
@@ -44,13 +45,18 @@ class Auth extends Component {
         hub.login(this.state);
     }
 
-    connectSocket() {
+    onFacebook() {
 
-    }
+	}
+
+	onLinkedin() {
+
+	}
 
     render() {
         return(
             <ScrollView style={styles.cellStyle}>
+				<View style={styles.container}>
 				<Text>SIGNUP</Text>
                 <TextInput
                     value={this.state.age}
@@ -108,15 +114,21 @@ class Auth extends Component {
 				<View style={styles.separator}></View>
 
 				<Text>FB AUTH</Text>
-
+				<TouchableOpacity onPress={() => this.onFacebook()}>
+					<Text>SEND</Text>
+				</TouchableOpacity>
 
 				<View style={styles.separator}></View>
 
 				<Text>LINKEDIN AUTH</Text>
+				<TouchableOpacity onPress={() => this.onLinkedin()}>
+					<Text>SEND</Text>
+				</TouchableOpacity>
 
 				<View style={styles.separator}></View>
 				<View style={styles.separator}></View>
 				<View style={styles.separator}></View>
+				</View>
 			</ScrollView>
         )
     }
@@ -124,13 +136,17 @@ class Auth extends Component {
 
 const styles = StyleSheet.create({
     cellStyle: {
-        flex: 1,
-		paddingTop: 70,		
+		paddingTop: 70,
+	},
+	container: {
+		flex: 1,
+		alignItems: 'center'
 	},
 	separator: {
 		height: 30
 	},
     cellTextInputStyle: {
+		alignSelf: 'center',
         height: 50,
 		width: 300,
         paddingLeft: 15,

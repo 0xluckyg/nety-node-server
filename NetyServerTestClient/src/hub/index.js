@@ -6,7 +6,7 @@ const Hub = {
     //res has two properties:
         //success: whether the request succeeded or not
         //data: token or error
-        
+
     signup: function(user) {
         Authorization.signup(user, (res) => {
             if (res.success) {

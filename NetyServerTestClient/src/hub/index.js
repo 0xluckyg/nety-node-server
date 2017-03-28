@@ -1,6 +1,7 @@
 import Authorization from './authorization';
 import SocketManager from './socketManager';
-
+import {getToken, setToken} from '../redux/actions';
+import store from '../redux/store';
 
 const Hub = {
     //res has two properties:
@@ -10,7 +11,10 @@ const Hub = {
     signup: function(user) {
         Authorization.signup(user, (res) => {
             if (res.success) {
-                SocketManager.connect(res.data)
+                let token = res.data;
+                SocketManager.connect(token)
+                store.dispatch(setToken(token))
+
                 console.log(`signup successful with token: ${res.data}`)
             } else {
                 console.log(`signup failed with error: ${res.data}`)
@@ -20,7 +24,10 @@ const Hub = {
     login: function(user) {
         Authorization.login(user, (res) => {
             if (res.success) {
-                SocketManager.connect(res.data)
+                let token = res.data;
+                SocketManager.connect(token)
+                store.dispatch(setToken(token))
+                
                 console.log(`signin successful with token: ${res.data}`)
             } else {
                 console.log(`signin failed with error: ${res.data}`)

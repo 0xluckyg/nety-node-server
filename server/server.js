@@ -34,7 +34,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('user.logout', (token) => {
-
+        socket.emit('user.logout.success', true)
     })
 })
 

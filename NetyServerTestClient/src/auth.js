@@ -42,7 +42,11 @@ class Auth extends Component {
     }
 
 	onLogin() {
-        hub.login(this.state);
+        hub.login({
+			age: '30',
+			email: "heyscott9@naver.com",
+			password: "password123"
+		});
     }
 
     onFacebook() {
@@ -96,13 +100,13 @@ class Auth extends Component {
 
 				<Text>LOGIN</Text>
                 <TextInput
-                    value={this.state.email}
+                    value={'heyscott9@naver.com'}
                     onChangeText={(email) => this.setState({email})}
                     style={styles.cellTextInputStyle}
                     placeholder={'email'}>
 				</TextInput>
                 <TextInput
-                    value={this.state.password}
+                    value={'password123'}
                     onChangeText={(password) => this.setState({password})}
                     style={styles.cellTextInputStyle}
                     placeholder={'password'}>

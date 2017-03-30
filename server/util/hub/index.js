@@ -33,7 +33,7 @@ const hub = {
                 return user.generateAuthToken().then((token) => {
                     res.header('x-auth', token).send(user);
                 });
-            }).catch((err) => {
+            }).catch((err) => {                
                 res.status(400).send(JSON.stringify(err));
             })
         });

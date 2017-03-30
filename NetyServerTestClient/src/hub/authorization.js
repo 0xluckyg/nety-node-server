@@ -15,6 +15,7 @@ const Auth = {
             response.data = res.headers['x-auth'];
             callback(response)
         }).catch((err) => {
+            console.log('error: ' + err)
             response.success = false;
             if (err.response != undefined) {
                 response.data = err.response.data
@@ -34,6 +35,7 @@ const Auth = {
             response.data = res.headers['x-auth'];
             callback(response)
         }).catch((err) => {
+            console.log(err)
             response.success = false;
             if (err.response != undefined) {
                 response.data = err.response.data

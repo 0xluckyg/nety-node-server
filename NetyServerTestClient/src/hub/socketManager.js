@@ -2,9 +2,11 @@ import SocketIOClient from 'socket.io-client';
 import _ from 'lodash';
 import * as keys from '../global/keys';
 
-const Socket = {
+let socket;
+
+const socketManager = {
     connect: function(token) {
-        let socket = SocketIOClient(keys.SERVER, {
+        socket = SocketIOClient(keys.SERVER, {
             'query': 'token=' + token
         });
 
@@ -15,7 +17,16 @@ const Socket = {
         socket.on('disconnect', () => {
             console.log('it disconnected')
         })
+
+        socket.on('user.logout.success', () => {
+            console.log('user logged out!');
+        })        
+    },
+    logout: function(token) {
+        if (socket) {
+            socket.emit('user.logout', {token})
+        }
     }
 }
 
-export default Socket;
+export default socketManager;

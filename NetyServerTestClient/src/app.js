@@ -9,16 +9,30 @@ import Logger from 'react-native-logger-client'
 import {connect} from 'react-redux';
 
 import Auth from './auth';
+import Main from './main';
 
 class App extends Component {
+    constructor(props) {
+        super(props)
+
+        this.renderLoginOrMain = this.renderLoginOrMain.bind(this);
+    }
+
+    renderLoginOrMain() {
+        if (this.props.token === '') {
+            return <Auth/>
+        } else {
+            return <Main/>
+        }
+    }
+
     render(){
         return (
             <View style={styles.container}>
-                {console.log('token: ' + this.props.token)}                
-                <Auth/>
                 <View style={styles.logger}>
                     <Logger/>
                 </View>
+                {this.renderLoginOrMain()}
             </View>
         )
     }
@@ -30,7 +44,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5FCFF'
     },
     logger: {
-        paddingTop: 750,
+        paddingTop: 150,
 
         position: 'absolute',
 

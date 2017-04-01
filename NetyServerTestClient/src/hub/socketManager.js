@@ -17,15 +17,19 @@ const socketManager = {
         socket.on('disconnect', () => {
             console.log('it disconnected')
         })
-
-        socket.on('user.logout.success', () => {
-            console.log('user logged out!');
-        })        
     },
     logout: function(token) {
         if (socket) {
             socket.emit('user.logout', {token})
         }
+
+        socket.on('user.logout.success', () => {
+            console.log('user logged out!');
+        })
+
+        socket.on('user.logout.fail', () => {
+            console.log('logout failed');
+        })
     }
 }
 

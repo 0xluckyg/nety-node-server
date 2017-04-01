@@ -12,9 +12,9 @@ const hub = {
 
             user.save().then(() => {
                 return user.generateAuthToken();
-            }).then((token) => {
+            }).then(token => {
                 res.header('x-auth', token).send(user);
-            }).catch((err) => {
+            }).catch(err => {
                 if (err.errors != undefined) {
                     let errorMessage = err.errors[Object.keys(err.errors)[0]].message;
                     res.status(400).send(errorMessage);
@@ -28,12 +28,11 @@ const hub = {
         app.post('/login', function (req, res) {
             let body = _.pick(req.body, ['email', 'password']);
             let user = new User(body);
-            console.log(body)
-            User.findByCredentials(body.email, body.password).then((user) => {
-                return user.generateAuthToken().then((token) => {
+            User.findByCredentials(body.email, body.password).then(user => {
+                return user.generateAuthToken().then(token => {
                     res.header('x-auth', token).send(user);
                 });
-            }).catch((err) => {                
+            }).catch(err => {
                 res.status(400).send(JSON.stringify(err));
             })
         });

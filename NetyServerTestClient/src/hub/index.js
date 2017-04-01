@@ -37,7 +37,7 @@ const Hub = {
     },
     logout: function() {
         SocketManager.logout(token)
-    }
+    }    
 }
 
 export default Hub;

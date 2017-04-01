@@ -22,20 +22,57 @@ const io = socketIO(server);
 //Global authorization: required a token to connect to our socket
 io.use(authenticateToken);
 
-io.on('connection', (socket) => {
+io.on('connection', socket => {
     console.log(socket.handshake.query.token)
 
-    socket.on('user.get', (token) => {
+    socket.on('/user/get', token => {
+        User.findByToken(token).then(user => {
+            if (!user) {
+                return Promise.reject()
+            }
 
+            socket.emit('/user/get/success', user);
+
+        }).catch(err => {
+            socket.emit('/user/get/fail', err);
+        })
     })
 
-    socket.on('user.login', (data) => {
+    socket.on('/user/update', user => {
+        const id = user._id
 
+        if (!ObjectID.isValid(_id)) {
+            return Promise.reject();
+        }
+
+        User.findOneAndUpdate({_id: id}, {$set: user}, {new: true}).then((user) => {
+            if (!user) {
+                return Promise.reject();
+            }
+
+            socket.emit('/user/update/success', user);
+
+        }).catch((err) => {
+            socket.emit('/user/update/fail', err);
+        })
     })
 
-    socket.on('user.logout', (token) => {
-        socket.emit('user.logout.success', true)
-    })
+    socket.on('/user/logout', token => {
+        User.findByToken(token).then(user => {
+            if (!user) {
+                return Promise.reject();
+            }
+
+            user.removeToken(token).then(() => {
+                socket.emit('/user/logout/success')
+            }, () => {
+                return Promise.reject()
+            })
+
+        }).catch(err => {
+            socket.emit('/user/logout/fail', err)
+        });
+    });
 })
 
 server.listen(port, () => {

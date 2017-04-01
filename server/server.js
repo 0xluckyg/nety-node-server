@@ -25,54 +25,26 @@ io.use(authenticateToken);
 io.on('connection', socket => {
     console.log(socket.handshake.query.token)
 
-    socket.on('/user/get', token => {
-        User.findByToken(token).then(user => {
-            if (!user) {
-                return Promise.reject()
-            }
+    //USER
+    hub.getUserByToken(socket);
 
-            socket.emit('/user/get/success', user);
+    hub.getUserById(socket);
 
-        }).catch(err => {
-            socket.emit('/user/get/fail', err);
-        })
-    })
+    hub.updateUser(socket);
 
-    socket.on('/user/update', user => {
-        const id = user._id
+    hub.logoutUser(socket);
 
-        if (!ObjectID.isValid(_id)) {
-            return Promise.reject();
-        }
+    //USER PROPERTY
+    hub.getNetwork(socket);
 
-        User.findOneAndUpdate({_id: id}, {$set: user}, {new: true}).then((user) => {
-            if (!user) {
-                return Promise.reject();
-            }
+    hub.getChatrooms(socket);
 
-            socket.emit('/user/update/success', user);
+    hub.getContacts(socket);
 
-        }).catch((err) => {
-            socket.emit('/user/update/fail', err);
-        })
-    })
+    hub.joinRoom(socket);
 
-    socket.on('/user/logout', token => {
-        User.findByToken(token).then(user => {
-            if (!user) {
-                return Promise.reject();
-            }
+    hub.message(socket);
 
-            user.removeToken(token).then(() => {
-                socket.emit('/user/logout/success')
-            }, () => {
-                return Promise.reject()
-            })
-
-        }).catch(err => {
-            socket.emit('/user/logout/fail', err)
-        });
-    });
 })
 
 server.listen(port, () => {

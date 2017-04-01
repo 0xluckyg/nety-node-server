@@ -1,8 +1,8 @@
 const _ = require('lodash');
 const {User} = require('../../models/user');
 const {UserProperty} = require('../../models/UserProperty');
-const {message} = require('../../models/message');
-const {chatroom} = require('../../models/chatroom');
+const {Message} = require('../../models/message');
+const {Chatroom} = require('../../models/chatroom');
 
 const hub = {
     onSignup: function(app) {
@@ -37,6 +37,141 @@ const hub = {
             })
         });
     },
+    updateUser: function(socket) {
+        socket.on('/user/update', user => {
+            const id = user._id
+
+            if (!ObjectID.isValid(_id)) {
+                return Promise.reject();
+            }
+
+            User.findOneAndUpdate({_id: id}, {$set: user}, {new: true}).then((user) => {
+                if (!user) {
+                    return Promise.reject();
+                }
+
+                socket.emit('/user/update/success', user);
+
+            }).catch((err) => {
+                socket.emit('/user/update/fail', {err});
+            })
+        })
+    },
+    logoutUser: function(socket) {
+        socket.on('/user/logout', token => {
+            User.findByToken(token).then(user => {
+                if (!user) {
+                    return Promise.reject();
+                }
+
+                user.removeToken(token).then(() => {
+                    socket.emit('/user/logout/success')
+                }, () => {
+                    return Promise.reject()
+                })
+
+            }).catch(err => {
+                socket.emit('/user/logout/fail', {err})
+            });
+        });
+    },
+    getUserByToken: function(socket) {
+        socket.on('/user/getByToken', token => {
+            User.findByToken(token).then(user => {
+                if (!user) {
+                    return Promise.reject()
+                }
+
+                socket.emit('/user/getByToken/success', user);
+
+            }).catch(err => {
+                socket.emit('/user/getByToken/fail', err);
+            })
+        })
+    },
+    getUserById: function(socket) {
+        socket.on('/user/getById', id => {
+            User.findById(id).then(user => {
+                if (!user) {
+                    return Promise.reject()
+                }
+
+                socket.emit('/user/getById/success', user)
+
+            }).catch(err => {
+                socket.emit('/user/getById/fail', err)
+            })
+        })
+    },
+    getNetwork: function(socket) {
+        socket.on('/user/getNetwork', loc => {
+            User.find().then(users => {
+                if (!users) {
+                    return Promise.reject()
+                }
+
+                socket.emit('/user/getNetwork/success', users)
+
+            }).catch(err => {
+                socket.emit('/user/getNetwork/fail', err)
+            })
+        })
+    },
+    getChatrooms: function(socket) {
+        socket.on('/user/getChats', id => {
+            UserProperty.find({userID: id}).then(userProperty => {
+                if (!userProperty) {
+                    return Promise.reject()
+                }
+
+                Chatroom.find({
+                    _id: {$in: userProperty.chatrooms}
+                }).then(chatrooms => {
+                    if (chatrooms) {
+                        socket.emit('/user/getChats/success', chatrooms)
+                    }
+                });
+
+            }).catch(err => {
+                socket.emit('/user/getChats/fail', err)
+            })
+        })
+    },
+    getContacts: function(socket) {
+        socket.on('/user/getContacts', id => {
+            UserProperty.find({userID: id}).then(userProperty => {
+                if (!userProperty) {
+                    return Promise.reject()
+                }
+
+                User.find({
+                    _id: {$in: userProperty.contacts}
+                }).then(contacts => {
+                    if (contacts) {
+                        socket.emit('/user/getChats/success', contacts)
+                    }
+                })
+
+            }).catch(err => {
+                socket.emit('/user/getChats/fail', err)
+            })
+        })
+    },
+    joinRoom: function(socket) {
+        socket.on('/room', id => {
+            socket.join(id);
+        })
+    },
+    message: function(socket) {
+        socket.on('/message', msg => {
+            let message = new Message(msg);
+            message.save().then(() => {
+                socket.broadcast.to(msg.chatId).emit('message', msg);
+            }).catch(err => {
+                socket.emit('/message/fail', err)
+            })
+        })
+    }
 }
 
 module.exports = {hub};

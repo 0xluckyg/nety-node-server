@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 let UserProperty = mongoose.model('UserDetail', {
+    userID: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
+    },
     chatrooms: [{
         chatroomID: {
             type: mongoose.Schema.Types.ObjectId,

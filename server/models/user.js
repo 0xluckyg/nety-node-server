@@ -11,15 +11,7 @@ let UserSchema = new mongoose.Schema({
         type: String,
         default: 'normal'
     },
-    tokens: [{
-        access: {
-            type: String
-        },
-        token: {
-            type: String
-        }
-    }],
-
+    token: String,
     email: {
         type: String,
         required: [true, 'Please provide an email'],
@@ -35,6 +27,7 @@ let UserSchema = new mongoose.Schema({
     //password is null if OAuth
     password: {
         type: String,
+        trim: true,
         minlength: [8, 'Please make your password longer than 8 characters'],
         default: null
     },
@@ -141,7 +134,7 @@ UserSchema.methods.toJSON = function() {
     let user = this;
     let userObject = user.toObject();
 
-    return _.drop(userObject, ['authType', 'password', 'tokens']);
+    return _.omit(userObject, ['authType', 'password', 'token']);
 }
 
 UserSchema.methods.generateAuthToken = function() {
@@ -153,10 +146,7 @@ UserSchema.methods.generateAuthToken = function() {
         access
     }, process.env.JWT_SECRET).toString();
 
-    user.tokens.push({
-        access,
-        token
-    })
+    user.token = token;
 
     return user.save().then(() => {
         return token;
@@ -167,8 +157,8 @@ UserSchema.methods.removeToken = function(token) {
     let user = this;
 
     return user.update({
-        $pull: {
-            tokens: { token }
+        $unset: {
+            token: { token }
         }
     })
 }
@@ -186,8 +176,7 @@ UserSchema.statics.findByToken = function(token) {
 
     return User.findOne({
         _id: decoded._id,
-        'tokens.token': token,
-        'tokens.access': 'auth'
+        token
     })
 }
 

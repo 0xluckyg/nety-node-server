@@ -32,7 +32,8 @@ class Auth extends Component {
         }
 
         this.onSignup = this.onSignup.bind(this);
-		this.onLogin = this.onLogin.bind(this);
+		this.onLoginTest1 = this.onLoginTest1.bind(this);
+		this.onLoginTest2 = this.onLoginTest2.bind(this);
 		this.onFacebook = this.onFacebook.bind(this);
 		this.onLinkedin = this.onLinkedin.bind(this);
     }
@@ -41,11 +42,18 @@ class Auth extends Component {
         hub.signup(this.state);
     }
 
-	onLogin() {
+	onLoginTest1() {
         hub.login({
 			age: '30',
-			email: "heyscott9@naver.com",
-			password: "password123"
+			email: "test1@gmail.com",
+			password: "test1password"
+		});
+    }
+	onLoginTest2() {
+        hub.login({
+			age: '30',
+			email: "test2@gmail.com",
+			password: "test2password"
 		});
     }
 
@@ -100,18 +108,36 @@ class Auth extends Component {
 
 				<Text>LOGIN</Text>
                 <TextInput
-                    value={'heyscott9@naver.com'}
+                    value={'test1@gmail.com'}
                     onChangeText={(email) => this.setState({email})}
                     style={styles.cellTextInputStyle}
                     placeholder={'email'}>
 				</TextInput>
                 <TextInput
-                    value={'password123'}
+                    value={'test1password'}
                     onChangeText={(password) => this.setState({password})}
                     style={styles.cellTextInputStyle}
                     placeholder={'password'}>
 				</TextInput>
-				<TouchableOpacity onPress={() => this.onLogin()}>
+				<TouchableOpacity onPress={() => this.onLoginTest1()}>
+                    <Text>SEND</Text>
+                </TouchableOpacity>
+				<View style={styles.separator}></View>
+
+				<Text>LOGIN</Text>
+                <TextInput
+                    value={'test2@naver.com'}
+                    onChangeText={(email) => this.setState({email})}
+                    style={styles.cellTextInputStyle}
+                    placeholder={'email'}>
+				</TextInput>
+                <TextInput
+                    value={'test2password'}
+                    onChangeText={(password) => this.setState({password})}
+                    style={styles.cellTextInputStyle}
+                    placeholder={'password'}>
+				</TextInput>
+				<TouchableOpacity onPress={() => this.onLoginTest2()}>
                     <Text>SEND</Text>
                 </TouchableOpacity>
 

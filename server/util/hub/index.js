@@ -3,6 +3,7 @@ const {User} = require('../../models/user');
 const {UserProperty} = require('../../models/UserProperty');
 const {Message} = require('../../models/message');
 const {Chatroom} = require('../../models/chatroom');
+const {ObjectID} = require('mongodb');
 
 const hub = {
     onSignup: function(app) {
@@ -37,6 +38,17 @@ const hub = {
             })
         });
     },
+    joinSelf: function(socket) {
+        User.findByToken(socket.handshake.query.token).then(user => {
+            if (!user) {
+                return Promise.reject()
+            }
+            socket.join(user._id);
+
+        }).catch((err) => {
+            socket.emit('criticalError', err);
+        })
+    },
     updateUser: function(socket) {
         socket.on('/user/update', user => {
             const id = user._id
@@ -58,7 +70,8 @@ const hub = {
         })
     },
     logoutUser: function(socket) {
-        socket.on('/user/logout', token => {
+        let token = socket.handshake.query.token;
+        socket.on('/user/logout', () => {
             User.findByToken(token).then(user => {
                 if (!user) {
                     return Promise.reject();
@@ -71,13 +84,13 @@ const hub = {
                 })
 
             }).catch(err => {
-                socket.emit('/user/logout/fail', {err})
+                socket.emit('/user/logout/fail', err)
             });
         });
     },
     getUserByToken: function(socket) {
-        socket.on('/user/getByToken', token => {
-            User.findByToken(token).then(user => {
+        socket.on('/user/getByToken', () => {
+            User.findByToken(socket.handshake.query.token).then(user => {
                 if (!user) {
                     return Promise.reject()
                 }
@@ -104,13 +117,14 @@ const hub = {
         })
     },
     getNetwork: function(socket) {
-        socket.on('/user/getNetwork', loc => {
-            User.find().then(users => {
+        socket.on('/user/getNetwork', data => {
+            User.find({}).then(users => {
                 if (!users) {
                     return Promise.reject()
                 }
+                console.log(JSON.stringify(users))
 
-                socket.emit('/user/getNetwork/success', users)
+                socket.emit('/user/getNetwork/success', JSON.stringify(users))
 
             }).catch(err => {
                 socket.emit('/user/getNetwork/fail', err)
@@ -119,9 +133,10 @@ const hub = {
     },
     getChatrooms: function(socket) {
         socket.on('/user/getChats', id => {
-            UserProperty.find({userID: id}).then(userProperty => {
+            UserProperty.find({userId: id}).then(userProperty => {
                 if (!userProperty) {
-                    return Promise.reject()
+                    userProperty = new UserProperty({userId: id})
+                    userProperty.save();
                 }
 
                 Chatroom.find({
@@ -139,9 +154,10 @@ const hub = {
     },
     getContacts: function(socket) {
         socket.on('/user/getContacts', id => {
-            UserProperty.find({userID: id}).then(userProperty => {
+            UserProperty.find({userId: id}).then(userProperty => {
                 if (!userProperty) {
-                    return Promise.reject()
+                    userProperty = new UserProperty({userId: id})
+                    userProperty.save();
                 }
 
                 User.find({

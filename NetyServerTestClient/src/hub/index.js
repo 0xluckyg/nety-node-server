@@ -1,6 +1,6 @@
 import Authorization from './authorization';
 import SocketManager from './socketManager';
-import {getToken, setToken} from '../redux/actions';
+import {setUserId, setToken} from '../redux/actions';
 import store from '../redux/store';
 
 let token;
@@ -26,8 +26,15 @@ const Hub = {
         Authorization.login(user, (res) => {
             if (res.success) {
                 token = res.data;
-                SocketManager.connect(token)
-                store.dispatch(setToken(token))
+                //Save user token
+                SocketManager.connect(token, () => {
+                    store.dispatch(setToken(token));
+                })
+                //Save user Id
+                SocketManager.getUserByToken(token, (user) => {
+                    store.dispatch(setUserId(user._id));
+                    console.log('userId: ', store.getState().id);
+                });
 
                 console.log(`signin successful with token: ${res.data}`)
             } else {
@@ -36,8 +43,13 @@ const Hub = {
         });
     },
     logout: function() {
-        SocketManager.logout(token)
-    }    
+        SocketManager.logout(token, () => {
+            store.dispatch(setToken(''))
+        })        
+    },
+    getNetwork: function() {
+        SocketManager.getNetwork()
+    }
 }
 
 export default Hub;

@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 //Creating a new todo example
 let Message = mongoose.model('Messages', {
-    chatroomID: {
+    chatroomId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true
     },
-    senderID: {
+    senderId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true
     },

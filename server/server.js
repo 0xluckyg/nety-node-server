@@ -23,7 +23,9 @@ const io = socketIO(server);
 io.use(authenticateToken);
 
 io.on('connection', socket => {
-    console.log(socket.handshake.query.token)
+
+    //This is to join the user by user's own Id so that other users can send messages to the user's socket.
+    hub.joinSelf(socket);
 
     //USER
     hub.getUserByToken(socket);

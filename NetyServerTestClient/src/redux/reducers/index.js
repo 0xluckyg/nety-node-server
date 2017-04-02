@@ -9,6 +9,15 @@ const rootReducer = combineReducers({
             default:
                 return state;
         }
+    },
+    id: (state = '', action) => {
+        switch(action.type) {
+            case 'setUserId':
+                state = action.payload;
+                return state;
+            default:
+                return state;
+        }
     }
 })
 

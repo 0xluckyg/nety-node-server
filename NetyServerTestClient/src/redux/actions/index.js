@@ -4,3 +4,10 @@ export const setToken = (token) => {
         payload: token
     }
 }
+
+export const setUserId = (id) => {
+    return {
+        type: 'setUserId',
+        payload: id
+    }
+}

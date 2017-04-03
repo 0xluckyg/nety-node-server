@@ -246,6 +246,7 @@ const hub = {
             })
         })
     },
+    //TODO: Add to contacts if both messages are exchanged
     sendMessage: function(socket) {
 
         function updateChatroom(msg, callback) {

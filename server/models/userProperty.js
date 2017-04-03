@@ -6,14 +6,13 @@ let UserProperty = mongoose.model('UserDetail', {
         required: true
     },
     chatrooms: [{
-        chatroomId: mongoose.Schema.Types.ObjectId,
+        chatroomId: String,
         unread: {
             type: Number,
             default: 0
         }
     }],
-    contacts: [mongoose.Schema.Types.ObjectId],
-    blocked: [mongoose.Schema.Types.ObjectId]
+    contacts: [mongoose.Schema.Types.ObjectId]    
 });
 
 module.exports = {UserProperty};

@@ -58,6 +58,24 @@ const socketManager = {
         socket.on('/user/getNetwork/fail', (err) => {
             console.log(err)
         })
+    },
+    sendMessage: function(senderId, toId, text) {
+        let chatroomId;
+        if (senderId.localeCompare(toId) > 0) {
+            chatroomId = senderId + toId;
+        } else {
+            chatroomId = toId + senderId;
+        }
+
+        socket.emit('/message/send', {chatroomId, senderId, toId, text})
+
+        socket.on('/message/send/success', () => {
+            console.log('message sent')
+        })
+
+        socket.on('/message/send/fail', (err) => {
+            console.log(err)
+        })
     }
 }
 

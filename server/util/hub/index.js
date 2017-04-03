@@ -5,8 +5,19 @@ const {Message} = require('../../models/message');
 const {Chatroom} = require('../../models/chatroom');
 const {ObjectID} = require('mongodb');
 
+
+//TODO: DON"T FETCH BLOCKED USER
 const hub = {
     onSignup: function(app) {
+        function createUserProperty(userId, callback) {
+            let userProperty = new UserProperty({userId: user._id})
+            userProperty.save().then(() => {
+                callback();
+            }).catch(err => {
+                Promise.reject(err)
+            })
+        }
+
         app.post('/signup', function (req, res) {
             let body = _.pick(req.body, ['age', 'name', 'email', 'password']);
             let user = new User(body);
@@ -14,7 +25,9 @@ const hub = {
             user.save().then(() => {
                 return user.generateAuthToken();
             }).then(token => {
-                res.header('x-auth', token).send(user);
+                createUserProperty(user._id, () => {
+                    res.header('x-auth', token).send(user);
+                })
             }).catch(err => {
                 if (err.errors != undefined) {
                     let errorMessage = err.errors[Object.keys(err.errors)[0]].message;
@@ -38,39 +51,26 @@ const hub = {
             })
         });
     },
-    joinSelf: function(socket) {
-        User.findByToken(socket.handshake.query.token).then(user => {
-            if (!user) {
-                return Promise.reject()
-            }
-            socket.join(user._id);
-
-        }).catch((err) => {
-            socket.emit('criticalError', err);
-        })
-    },
     updateUser: function(socket) {
         socket.on('/user/update', user => {
-            const id = user._id
+            const _id = socket.userId
 
             if (!ObjectID.isValid(_id)) {
                 return Promise.reject();
             }
 
-            User.findOneAndUpdate({_id: id}, {$set: user}, {new: true}).then((user) => {
+            User.findOneAndUpdate({_id}, {$set: user}, {new: true}).then((user) => {
                 if (!user) {
                     return Promise.reject();
                 }
-
                 socket.emit('/user/update/success', user);
-
             }).catch((err) => {
                 socket.emit('/user/update/fail', {err});
             })
         })
     },
     logoutUser: function(socket) {
-        let token = socket.handshake.query.token;
+        let token = socket.userToken;
         socket.on('/user/logout', () => {
             User.findByToken(token).then(user => {
                 if (!user) {
@@ -90,7 +90,7 @@ const hub = {
     },
     getUserByToken: function(socket) {
         socket.on('/user/getByToken', () => {
-            User.findByToken(socket.handshake.query.token).then(user => {
+            User.findByToken(socket.userToken).then(user => {
                 if (!user) {
                     return Promise.reject()
                 }
@@ -108,9 +108,7 @@ const hub = {
                 if (!user) {
                     return Promise.reject()
                 }
-
                 socket.emit('/user/getById/success', user)
-
             }).catch(err => {
                 socket.emit('/user/getById/fail', err)
             })
@@ -122,21 +120,17 @@ const hub = {
                 if (!users) {
                     return Promise.reject()
                 }
-                console.log(JSON.stringify(users))
-
                 socket.emit('/user/getNetwork/success', JSON.stringify(users))
-
             }).catch(err => {
                 socket.emit('/user/getNetwork/fail', err)
             })
         })
     },
     getChatrooms: function(socket) {
-        socket.on('/user/getChats', id => {
-            UserProperty.find({userId: id}).then(userProperty => {
+        socket.on('/user/getChats', () => {
+            UserProperty.find({userId: socket.userId}).then(userProperty => {
                 if (!userProperty) {
-                    userProperty = new UserProperty({userId: id})
-                    userProperty.save();
+                    Promise.reject();
                 }
 
                 Chatroom.find({
@@ -153,11 +147,10 @@ const hub = {
         })
     },
     getContacts: function(socket) {
-        socket.on('/user/getContacts', id => {
-            UserProperty.find({userId: id}).then(userProperty => {
+        socket.on('/user/getContacts', () => {
+            UserProperty.find({userId: socket.userId}).then(userProperty => {
                 if (!userProperty) {
-                    userProperty = new UserProperty({userId: id})
-                    userProperty.save();
+                    Promise.reject();
                 }
 
                 User.find({
@@ -173,18 +166,154 @@ const hub = {
             })
         })
     },
-    joinRoom: function(socket) {
-        socket.on('/room', id => {
-            socket.join(id);
+    deleteChat: function(socket) {
+        socket.on('/self/deleteChat', chatroomId => {
+            UserProperty.findOneAndUpdate(
+                {userId: socket.userId},
+                {$pull: {chatrooms: {chatroomId}}}
+            ).then(() => {
+                socket.emit('/self/deleteChat/success', chatroomId)
+            }).catch(err => {
+                socket.emit('/self/deleteChat/fail', err)
+            })
         })
     },
-    message: function(socket) {
-        socket.on('/message', msg => {
-            let message = new Message(msg);
-            message.save().then(() => {
-                socket.broadcast.to(msg.chatId).emit('message', msg);
+    deleteContact: function(socket) {
+        function notifyUsersOfDeletedContact(deletedUserId) {
+            socket.emit('/self/deleteContact/success', deletedUserId)
+            socket.to(deletedUserId).emit('/contact/deletedBy', socket.userId)
+        }
+
+        function deleteUserFromContacts(userToDeleteId) {
+            UserProperty.findOneAndUpdate(
+                {userId: socket.userId},
+                {$pull: {contacts: userToDeleteId}}
+            ).then(() => {
+                UserProperty.findOneAndUpdate(
+                    {userId: userToDeleteId},
+                    {$pull: {contacts: socket.userId}}
+                ).then(() => {
+                    notifyUsersOfDeletedContact(userToDeleteId)
+                }).catch(err => {
+                    Promise.reject(err);
+                })
             }).catch(err => {
-                socket.emit('/message/fail', err)
+                socket.emit('/self/deleteContact/fail')
+            })
+        }
+        socket.on('/self/deleteContact', userToDeleteId => {
+            deleteUserFromContact(userToDelete);
+        })
+    },
+    blockUser: function(socket) {
+        socket.on('/self/blockUser', userToBlockId => {
+            User.findOneAndUpdate(
+                {_id: socket.userId},
+                {$push: {blocked: userToBlockId}},
+                {new: true}
+            ).then(user => {
+                socket.emit('/self/blockUser/success')
+                socket.to(userToBlockId).emit('/blockedBy', user._id)
+            }).catch(err => {
+                socket.emit('/self/blockUser/fail', err)
+            })
+        })
+    },
+    unblockUser: function(socket) {
+        socket.on('/self/unblockUser', userToUnblockId => {
+            User.findOneAndUpdate(
+                {_id: socket.userId},
+                {$pull: {blocked: userToBlockId}},
+                {new: true}
+            ).then(user => {
+                socket.emit('/self/unblockUser/success')
+                socket.to(userToBlockId).emit('/unblockedBy', user._id)
+            }).catch(err => {
+                socket.emit('/self/unblockUser/fail', err)
+            })
+        })
+    },
+    changeDiscoverableSetting: function(socket) {
+        socket.on('/self/changeDiscoverableSetting', discoverable => {
+            User.findOneAndUpdate(
+                {_id: socket.userId},
+                {$set: {discoverable}}
+            ).then(() => {
+                socket.broadcast.emit('/user/discoverableSetting', discoverable)
+                socket.emit('/self/changeDiscoverableSetting/success');
+            }).catch(err => {
+                socket.emit('/self/changeDiscoverableSetting/fail', err)
+            })
+        })
+    },
+    sendMessage: function(socket) {
+
+        function updateChatroom(msg, callback) {
+            Chatroom.findOneAndUpdate(
+                {_id: msg.chatroomId},
+                {$set: {lastMessage: msg.text}}
+            ).then(() => {
+                callback();
+            }).catch(err => {
+                Promise.reject(err)
+            })
+        }
+
+        function saveChatroomIdToUserProperty(userId, chatroomId, unread) {
+            UserProperty.findOneAndUpdate(
+                {userId},
+                {$push: {chatrooms: {chatroomId, unread}}}
+            ).catch(err => {
+                Promise.reject(err)
+            })
+        }
+
+        function createNewChatroom(msg, callback) {
+            const chatroom = new Chatroom({
+                _id: msg.chatroomId,
+                users: [
+                    new ObjectId(msg.senderId),
+                    new ObjectId(msg.toId)
+                ],
+                lastMessage: msg.text
+            })
+
+            chatroom.save().then(() => {
+                saveChatroomIdToUserProperty(msg.senderId, msg.chatroomId, 0)
+                saveChatroomIdToUserProperty(msg.toId, msg.chatroomId, 1)
+            }).catch(err => {
+                Promise.reject(err)
+            });
+        }
+
+        function saveMessageAndSend(msg) {
+            let message = new Message({
+                chatroomId: msg.chatroomId,
+                senderId: msg.senderId,
+                text: msg.text,
+                date: new Date()
+            });
+
+            message.save().then(() => {
+                socket.to(msg.toId).emit('message', msg);
+            }).catch(err => {
+                Promise.reject(err)
+            })
+        }
+
+        socket.on('/message', msg => {
+            Chatroom.findById(msg.chatroomId).then(chatroom => {
+                if (!chatroom) {
+                    createNewChatroom(msg, () => {
+                        saveMessageAndSend(msg)
+                    });
+                } else {
+                    updateChatroom(msg, () => {
+                        saveMessageAndSend(msg)
+                    });
+                }
+            }).catch(err => {
+                socket.emit('/message/send/fail', err)
             })
         })
     }

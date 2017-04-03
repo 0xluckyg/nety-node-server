@@ -3,6 +3,7 @@ const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
 const mongoose = require('./db/mongoose');
 const {authenticateToken} = require('./util/middleware/authenticate');
@@ -23,9 +24,15 @@ const io = socketIO(server);
 io.use(authenticateToken);
 
 io.on('connection', socket => {
+    console.log('client connected');
+
+    //Make client pass on userId as a query , and set userId to socket object
+    socket.userId = new ObjectID(socket.handshake.query.userId);
+    //Save token to the socket object
+    socket.userToken = socket.handshake.query.token;
 
     //This is to join the user by user's own Id so that other users can send messages to the user's socket.
-    hub.joinSelf(socket);
+    socket.join(socket.userId);
 
     //USER
     hub.getUserByToken(socket);
@@ -43,10 +50,8 @@ io.on('connection', socket => {
 
     hub.getContacts(socket);
 
-    hub.joinRoom(socket);
-
-    hub.message(socket);
-
+    //ACTION
+    hub.sendMessage(socket);
 })
 
 server.listen(port, () => {

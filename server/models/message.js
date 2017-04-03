@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 //Creating a new todo example
 let Message = mongoose.model('Messages', {
     chatroomId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true
     },
     senderId: {

@@ -45,10 +45,15 @@ const Hub = {
     logout: function() {
         SocketManager.logout(token, () => {
             store.dispatch(setToken(''))
-        })        
+        })
     },
     getNetwork: function() {
         SocketManager.getNetwork()
+    },
+    sendMessage: function(toId, msg) {
+        const senderId = store.getState().id
+
+        SocketManager.sendMessage(senderId, toId, msg)
     }
 }
 

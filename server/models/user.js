@@ -125,7 +125,8 @@ let UserSchema = new mongoose.Schema({
     discoverable: {
         type: Boolean,
         default: true
-    }
+    },
+    blocked: [mongoose.Schema.Types.ObjectId]
 });
 UserSchema.plugin(uniqueValidator, { message: 'This email is taken. Please try another email' });
 

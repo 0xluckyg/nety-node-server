@@ -1,17 +1,17 @@
 require('./config/config');
+require('./db/mongoose');
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 
-const mongoose = require('./db/mongoose');
 const {authenticateToken} = require('./util/middleware/authenticate');
 const {hub} = require('./util/hub');
 
 const port = process.env.PORT;
 
-var app = express();
+const app = express();
 app.use(bodyParser.json());
 
 hub.onSignup(app);
@@ -52,10 +52,10 @@ io.on('connection', socket => {
 
     //ACTION
     hub.sendMessage(socket);
-})
+});
 
 server.listen(port, () => {
     console.log('Started on port: ', port);
 });
 
-module.exports = {server}
+module.exports = {server};

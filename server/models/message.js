@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 //Creating a new todo example
-let Message = mongoose.model('Messages', {
+const Message = mongoose.model('Messages', {
     chatroomId: {
         type: String,
         required: true

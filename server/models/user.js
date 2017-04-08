@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
-var uniqueValidator = require('mongoose-unique-validator');
+const uniqueValidator = require('mongoose-unique-validator');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 
 //Creating a new todo example
-let UserSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     authType: {
         type: String,
         default: 'normal'
@@ -132,17 +132,17 @@ UserSchema.plugin(uniqueValidator, { message: 'This email is taken. Please try a
 
 //Overrides original toJSON. called in JSON.stringify when sending
 UserSchema.methods.toJSON = function() {
-    let user = this;
-    let userObject = user.toObject();
+    const user = this;
+    const userObject = user.toObject();
 
-    return _.omit(userObject, ['authType', 'password', 'token']);
-}
+    return _.omit(userObject, ['authType', 'password', 'token', 'email']);
+};
 
 UserSchema.methods.generateAuthToken = function() {
     //Arrow function does not bind 'this' keyword.
-    let user = this;
-    let access = 'auth';
-    let token = jwt.sign({
+    const user = this;
+    const access = 'auth';
+    const token = jwt.sign({
         _id: user._id.toHexString(),
         access
     }, process.env.JWT_SECRET).toString();
@@ -151,22 +151,22 @@ UserSchema.methods.generateAuthToken = function() {
 
     return user.save().then(() => {
         return token;
-    })
-}
+    });
+};
 
 UserSchema.methods.removeToken = function(token) {
-    let user = this;
+    const user = this;
 
     return user.update({
         $unset: {
             token: { token }
         }
-    })
-}
+    });
+};
 
 //Statics turns into a model method instead of an instance method
 UserSchema.statics.findByToken = function(token) {
-    let User = this;
+    const User = this;
     let decoded;
 
     try {
@@ -178,11 +178,11 @@ UserSchema.statics.findByToken = function(token) {
     return User.findOne({
         _id: decoded._id,
         token
-    })
-}
+    });
+};
 
 UserSchema.statics.findByCredentials = function(email, password) {
-    let User = this;
+    const User = this;
 
     return User.findOne({email}).then((user) => {
         if (!user) {
@@ -195,28 +195,28 @@ UserSchema.statics.findByCredentials = function(email, password) {
                 } else {
                     reject('Invalid password!');
                 }
-            })
-        })
-    })
-}
+            });
+        });
+    });
+};
 
 //Run middleware before 'save' operation
 UserSchema.pre('save', function(next) {
-    let user = this;
+    const user = this;
     //Checks if password was modified
     if (user.isModified('password')) {
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(user.password, salt, (err, hash) => {
                 user.password = hash;
                 next();
-            })
-        })
+            });
+        });
     } else {
         next();
     }
-})
+});
 
 //Creating a new user example
-let User = mongoose.model('User', UserSchema);
+const User = mongoose.model('User', UserSchema);
 
 module.exports = {User};

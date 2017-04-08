@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-let UserProperty = mongoose.model('UserDetail', {
+const UserProperty = mongoose.model('UserDetail', {
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true
@@ -12,7 +12,7 @@ let UserProperty = mongoose.model('UserDetail', {
             default: 0
         }
     }],
-    contacts: [mongoose.Schema.Types.ObjectId]    
+    contacts: [mongoose.Schema.Types.ObjectId]
 });
 
 module.exports = {UserProperty};

@@ -19,11 +19,11 @@ const port = process.env.PORT;
 const app = express();
 app.use(bodyParser.json());
 
-signup(app);
-login(app);
-
 const server = http.createServer(app);
 const io = socketIO(server);
+
+signup(app);
+login(app);
 
 //Global authorization: required a token to connect to our socket
 io.use(authenticateToken);
@@ -39,28 +39,28 @@ io.on('connection', socket => {
     //This is to join the user by user's own Id so that other users can send messages to the user's socket.
     socket.join(socket.userId);
 
-    //USER
-    getUserByToken(socket);
-    getUserById(socket);
-    updateUser(socket);
+    // //USER
+    // getUserByToken(socket);
+    // getUserById(socket);
+    // updateUser(socket);
 
-    //NETWORK
-    getNetwork(socket);
+    // //NETWORK
+    // getNetwork(socket);
 
-    //CONTACTS
-    getContacts(socket);
-    deleteContact(socket);
+    // //CONTACTS
+    // getContacts(socket);
+    // deleteContact(socket);
 
-    //CHAT
-    getChatrooms(socket);    
-    sendMessage(socket);
-    deleteChat(socket);
+    // //CHAT
+    // getChatrooms(socket);    
+    // sendMessage(socket);
+    // deleteChat(socket);
 
-    //SETTINGS
-    logoutUser(socket);
-    blockUser(socket);
-    unblockUser(socket);
-    changeDiscoverableSetting(socket);
+    // //SETTINGS
+    // logoutUser(socket);
+    // blockUser(socket);
+    // unblockUser(socket);
+    // changeDiscoverableSetting(socket);
 });
 
 server.listen(port, () => {

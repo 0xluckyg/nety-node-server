@@ -1,30 +1,19 @@
 const {User} = require('../models/user');
-const {UserProperty} = require('../models/userProperty');
 const _ = require('lodash');
 
 function signup(app) {
-    function createUserProperty(userId, callback) {
-        const userProperty = new UserProperty({userId: userId});
-        userProperty.save().then(() => {
-            callback();
-        }).catch(err => {
-            Promise.reject(err);
-        });
-    }
-
-    app.post('/signup', function (req, res) {
-        const body = _.pick(req.body, ['age', 'name', 'email', 'password']);
+    app.post('/signup', function (req, res) {        
+        const body = _.pick(req.body, ['age', 'name', 'email', 'password']);        
         const user = new User(body);
 
         user.save().then(() => {
             return user.generateAuthToken();
-        }).then(token => {
-            createUserProperty(user._id, () => {
-                res.header('x-auth', token).send(user);
-            });
+        }).then(token => {            
+            res.header('x-auth', token).send(user);
         }).catch(err => {
             if (err.errors !== undefined) {
                 const errorMessage = err.errors[Object.keys(err.errors)[0]].message;
+                console.log(errorMessage);
                 res.status(400).send(errorMessage);
             } else {
                 res.status(400).send(JSON.stringify(err));

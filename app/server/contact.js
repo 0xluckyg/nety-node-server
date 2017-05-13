@@ -1,15 +1,14 @@
 const {User} = require('../models/user');
-const {UserProperty} = require('../models/userProperty');
 
 function getContacts(socket) {
     socket.on('/user/getContacts', () => {
-        UserProperty.find({userId: socket.userId}).then(userProperty => {
-            if (!userProperty) {
+        User.find({_id: socket.userId}).then(user => {
+            if (!user) {
                 Promise.reject();
             }
 
             User.find({
-                _id: {$in: userProperty.contacts}
+                _id: {$in: user.contacts}
             }).then(contacts => {
                 if (contacts) {
                     socket.emit('/user/getChats/success', contacts);
@@ -29,12 +28,12 @@ function deleteContact(socket) {
     }
 
     function deleteUserFromContacts(userToDeleteId) {
-        UserProperty.findOneAndUpdate(
-            {userId: socket.userId},
+        User.findOneAndUpdate(
+            {_id: socket.userId},
             {$pull: {contacts: userToDeleteId}}
         ).then(() => {
-            UserProperty.findOneAndUpdate(
-                {userId: userToDeleteId},
+            User.findOneAndUpdate(
+                {_id: userToDeleteId},
                 {$pull: {contacts: socket.userId}}
             ).then(() => {
                 notifyUsersOfDeletedContact(userToDeleteId);

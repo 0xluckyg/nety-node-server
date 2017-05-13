@@ -1,17 +1,17 @@
-const {UserProperty} = require('../models/userProperty');
+const {User} = require('../models/user');
 const {Chatroom} = require('../models/chatroom');
 const {Message} = require('../models/message');
 const {ObjectID} = require('mongodb');
 
 function getChatrooms(socket) {
     socket.on('/user/getChats', () => {
-        UserProperty.find({userId: socket.userId}).then(userProperty => {
-            if (!userProperty) {
+        User.find({_id: socket.userId}, {chatrooms: 1}).then(userChatrooms => {
+            if (!userChatrooms) {
                 Promise.reject();
             }
 
             Chatroom.find({
-                _id: {$in: userProperty.chatrooms}
+                _id: {$in: userChatrooms}
             }).then(chatrooms => {
                 if (chatrooms) {
                     socket.emit('/user/getChats/success', chatrooms);
@@ -37,9 +37,9 @@ function sendMessage(socket) {
         });
     }
 
-    function saveChatroomIdToUserProperty(userId, chatroomId, unread) {
-        UserProperty.findOneAndUpdate(
-            {userId},
+    function saveChatroomIdToUser(userId, chatroomId, unread) {
+        User.findOneAndUpdate(
+            {_id: userId},
             {$push: {chatrooms: {chatroomId, unread}}}
         ).catch(err => {
             Promise.reject(err);
@@ -57,8 +57,8 @@ function sendMessage(socket) {
         });
 
         chatroom.save().then(() => {
-            saveChatroomIdToUserProperty(msg.senderId, msg.chatroomId, 0);
-            saveChatroomIdToUserProperty(msg.toId, msg.chatroomId, 1);
+            saveChatroomIdToUser(msg.senderId, msg.chatroomId, 0);
+            saveChatroomIdToUser(msg.toId, msg.chatroomId, 1);
             callback();
         }).catch(err => {
             Promise.reject(err);
@@ -99,8 +99,8 @@ function sendMessage(socket) {
 
 function deleteChat(socket) {
     socket.on('/self/deleteChat', chatroomId => {
-        UserProperty.findOneAndUpdate(
-            {userId: socket.userId},
+        User.findOneAndUpdate(
+            {_id: socket.userId},
             {$pull: {chatrooms: {chatroomId}}}
         ).then(() => {
             socket.emit('/self/deleteChat/success', chatroomId);

@@ -126,7 +126,15 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    blocked: [mongoose.Schema.Types.ObjectId]
+    blocked: [mongoose.Schema.Types.ObjectId],
+    chatrooms: [{
+        chatroomId: String,
+        unread: {
+            type: Number,
+            default: 0
+        }
+    }],
+    contacts: [mongoose.Schema.Types.ObjectId]
 });
 UserSchema.plugin(uniqueValidator, { message: 'This email is taken. Please try another email' });
 
@@ -135,7 +143,7 @@ UserSchema.methods.toJSON = function() {
     const user = this;
     const userObject = user.toObject();
 
-    return _.omit(userObject, ['authType', 'password', 'token', 'email']);
+    return _.omit(userObject, ['authType', 'password', 'token']);
 };
 
 UserSchema.methods.generateAuthToken = function() {

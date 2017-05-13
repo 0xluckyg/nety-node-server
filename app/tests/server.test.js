@@ -7,7 +7,7 @@ const port = 'http://localhost:3000';
 
 describe('signup', () => {
     it('should create a new user return auth token', (done) => {
-
+        
     });
 
     it('should create a new user and broadcast', (done) => {

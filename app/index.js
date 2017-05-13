@@ -6,16 +6,21 @@ const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 
-const {authenticateToken} = require('./util/middleware/authenticate');
-const {hub} = require('./util/hub');
+const {authenticateToken} = require('./middleware/authenticate');
+const {signup, login} = require('./server/authentication');
+const {getChatrooms, sendMessage, deleteChat} = require('./server/chat');
+const {getContacts, deleteContact} = require('./server/contact');
+const {getNetwork} = require('./server/network');
+const {logoutUser, blockUser, unblockUser, changeDiscoverableSetting} = require('./server/settings');
+const {getUserById, getUserByToken, updateUser} = require('./server/user');
 
 const port = process.env.PORT;
 
 const app = express();
 app.use(bodyParser.json());
 
-hub.onSignup(app);
-hub.onLogin(app);
+signup(app);
+login(app);
 
 const server = http.createServer(app);
 const io = socketIO(server);
@@ -35,23 +40,27 @@ io.on('connection', socket => {
     socket.join(socket.userId);
 
     //USER
-    hub.getUserByToken(socket);
+    getUserByToken(socket);
+    getUserById(socket);
+    updateUser(socket);
 
-    hub.getUserById(socket);
+    //NETWORK
+    getNetwork(socket);
 
-    hub.updateUser(socket);
+    //CONTACTS
+    getContacts(socket);
+    deleteContact(socket);
 
-    hub.logoutUser(socket);
+    //CHAT
+    getChatrooms(socket);    
+    sendMessage(socket);
+    deleteChat(socket);
 
-    //USER PROPERTY
-    hub.getNetwork(socket);
-
-    hub.getChatrooms(socket);
-
-    hub.getContacts(socket);
-
-    //ACTION
-    hub.sendMessage(socket);
+    //SETTINGS
+    logoutUser(socket);
+    blockUser(socket);
+    unblockUser(socket);
+    changeDiscoverableSetting(socket);
 });
 
 server.listen(port, () => {

@@ -26,6 +26,7 @@ const UserSchema = new mongoose.Schema({
     },
     //password is null if OAuth
     password: {
+        required: [true, 'Please provide password'],
         type: String,
         trim: true,
         minlength: [8, 'Please make your password longer than 8 characters'],
@@ -34,15 +35,15 @@ const UserSchema = new mongoose.Schema({
     name: {
         first: {
             type: String,
-            min: [1, 'Please provide a valid name'],
-            max: [20, 'Please provide a valid name'],
+            minlength: [1, 'Please provide a valid name'],
+            maxlength: [20, 'Please provide a valid name'],
             trim: true,
             required: [true, 'Please provide a name']
         },
         last: {
             type: String,
-            min: [1, 'Please provide a valid name'],
-            max: [20, 'Please provide a valid name'],
+            minlength: [1, 'Please provide a valid name'],
+            maxlength: [20, 'Please provide a valid name'],
             trim: true,
             required: [true, 'Please provide a name']
         }

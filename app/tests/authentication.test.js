@@ -47,11 +47,33 @@ function signupTest() {
             .end(done);
         });
 
-        it('should return validation error if request invalid', (done) => {
-            const mock = users[0];
+        it('should return validation error if age invalid', (done) => {
+            const mock = users[1];
             request(server)
             .post('/signup')
             .send({age: 1, email: mock.email, password: mock.password, name: mock.name})
+            .expect(400)
+            .end(done);
+        });
+
+        it('should return validation error if name invalid', (done) => {
+            const mock = users[1];
+            request(server)
+            .post('/signup')
+            .send({
+                age: mock.age, 
+                email: mock.email, 
+                password: mock.password, 
+                name: {first: 'abcdefghijklmnopqrstuvwxyz', last: 'b'}})
+            .expect(400)
+            .end(done);
+        });
+
+        it('should return validation error if email invalid', (done) => {
+            const mock = users[1];
+            request(server)
+            .post('/signup')
+            .send({age: mock.age, email: "aoweijogij", password: mock.password, name: mock.name})
             .expect(400)
             .end(done);
         });

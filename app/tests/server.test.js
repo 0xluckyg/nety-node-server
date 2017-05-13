@@ -12,7 +12,7 @@ const {logoutTest, blockTest, unblockTest, discoverySettingTest} = require('./se
 const {getNetworkTest} = require('./network.test');
 const {getContactsTest, deleteContactTest} = require('./contact.test');
 
-beforeEach(populateUser);
+// beforeEach(populateUser);
 beforeEach(populateMessages);
 beforeEach(populateChatrooms);
 

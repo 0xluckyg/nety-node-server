@@ -28,8 +28,8 @@ login(app);
 //Global authorization: required a token to connect to our socket
 io.use(authenticateToken);
 
-io.on('connection', socket => {
-    console.log('client connected');
+io.on('connection', socket => {    
+    socket.emit('welcome', true);
 
     //Make client pass on userId as a query , and set userId to socket object
     socket.userId = new ObjectID(socket.handshake.query.userId);

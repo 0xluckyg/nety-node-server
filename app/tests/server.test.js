@@ -1,5 +1,4 @@
 const expect = require('expect');
-const io = require('socket.io-client');
 const request = require('supertest');
 const {app} = require('../index');
 
@@ -13,7 +12,8 @@ const {getNetworkTest} = require('./network.test');
 const {getContactsTest, deleteContactTest} = require('./contact.test');
 
 // beforeEach(populateUser);
-beforeEach(populateMessages);
-beforeEach(populateChatrooms);
+// beforeEach(populateMessages);
+// beforeEach(populateChatrooms);
 
 signupTest();
+socketConnectTest();

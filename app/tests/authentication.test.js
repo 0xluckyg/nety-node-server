@@ -3,15 +3,20 @@ const request = require('supertest');
 const {server} = require('../index');
 const {User} = require('../models/user');
 const {users} = require('./seed');
+const io = require('socket.io-client');
+const url = 'http://localhost:3000';
 
 function signupTest() {    
+    
     describe('signup', () => {
+        
         beforeEach((done) => {            
             User.remove({}).then(() => {
                 const user = new User(users[0]);
                 user.save(() => done());
             });
         });
+
         it('should create a new user return auth token', (done) => {            
             const mock = users[1];
             request(server)
@@ -76,11 +81,7 @@ function signupTest() {
             .send({age: mock.age, email: "aoweijogij", password: mock.password, name: mock.name})
             .expect(400)
             .end(done);
-        });
-
-        it('should create a new user and broadcast', (done) => {
-            done();
-        });
+        });       
     });
 }
 
@@ -101,15 +102,70 @@ function loginTest() {
 }
 
 function socketConnectTest() {
-    const url = 'http://localhost:3000';
+    describe('connect to socket', () => {                
 
-    describe('connect to socket', () => {
-        it ('should connect to socket with a valid auth token', (done) => {
-            
+        beforeEach((done) => {            
+            User.remove({}).then(() => done());
         });
 
-        it ('should not connect to socket without an invalid auth token', (done) => {
+        it('should create a new user and connect with valid token', (done) => {
+            const mock = users[1];            
+            request(server)
+            .post('/signup')
+            .send(mock)
+            .expect(200)
+            .end((err, res) => {                
+                expect(res.headers['x-auth']).toExist();
+                const socket = io.connect(url, {
+                    'query': 'token=' + res.headers['x-auth']
+                });                                                
+                socket.on('welcome', connected => {                    
+                    expect(connected).toBe(true);                                        
+                    done();
+                });                                
+            });
+        });
 
+        it('should not connect to socket with an invalid auth token', (done) => {
+            const mock = users[1];            
+            request(server)
+            .post('/signup')
+            .send(mock)
+            .expect(200)
+            .end((err, res) => {
+                expect(res.headers['x-auth']).toExist();
+                const socket = io.connect(url, {
+                    'query': 'token=' + 'invalidToken'
+                });                
+                socket.on('connect', connected => {                                           
+                    expect(connected).toNotBe(true);
+                    done();
+                });               
+
+                setTimeout(() => {
+                    done();
+                }, 500);
+            });
+        });
+
+        it('should not connect to socket without token', (done) => {
+            const mock = users[1];            
+            request(server)
+            .post('/signup')
+            .send(mock)
+            .expect(200)
+            .end((err, res) => {
+                expect(res.headers['x-auth']).toExist();
+                const socket = io.connect(url);                
+                socket.on('connect', connected => {                                           
+                    expect(connected).toNotBe(true);
+                    done();
+                });               
+
+                setTimeout(() => {
+                    done();
+                }, 500);
+            });
         });
     });
 }

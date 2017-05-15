@@ -16,4 +16,5 @@ const {getContactsTest, deleteContactTest} = require('./contact.test');
 // beforeEach(populateChatrooms);
 
 signupTest();
+loginTest();
 socketConnectTest();

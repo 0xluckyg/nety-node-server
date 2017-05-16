@@ -2,21 +2,23 @@ const {User} = require('../models/user');
 const {ObjectID} = require('mongodb');
 
 function updateUser(socket) {
-    socket.on('/user/update', user => {
-        const _id = socket.userId;
+    socket.on('/self/update', user => {
+        // const _id = socket.userId;
 
-        if (!ObjectID.isValid(_id)) {
-            return socket.emit('/criticalError', user);
-        }
+        // if (!ObjectID.isValid(_id)) {
+        //     return socket.emit('/criticalError', user);
+        // }
 
-        User.findOneAndUpdate({_id}, {$set: user}, {new: true}).then((user) => {
-            if (!user) {
-                return socket.emit('/criticalError', user);
-            }
-            socket.emit('/user/update/success', user);
-        }).catch((err) => {
-            socket.emit('/user/update/fail', {err});
-        });
+        // User.findOneAndUpdate({_id}, {$set: user}, {new: true}).then((user) => {
+        //     if (!user) {
+        //         return socket.emit('/criticalError', user);
+        //     }
+        //     socket.emit('/me/update/success', user);
+        // }).catch((err) => {
+        //     socket.emit('/me/update/fail', {err});
+        // });
+
+        socket.emit('/self/update/success');
     });
 }
 

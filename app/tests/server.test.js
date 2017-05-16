@@ -11,10 +11,8 @@ const {logoutTest, blockTest, unblockTest, discoverySettingTest} = require('./se
 const {getNetworkTest} = require('./network.test');
 const {getContactsTest, deleteContactTest} = require('./contact.test');
 
-// beforeEach(populateUser);
-// beforeEach(populateMessages);
-// beforeEach(populateChatrooms);
+// signupTest();
+// loginTest();
+// socketConnectTest();
 
-signupTest();
-loginTest();
-socketConnectTest();
+updateTest();

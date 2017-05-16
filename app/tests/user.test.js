@@ -2,7 +2,7 @@ const expect = require('expect');
 const request = require('supertest');
 const {server} = require('../index');
 const {User} = require('../models/user');
-const {users, completeUsers, url} = require('./seed');
+const {users, completeUsers, url, exampleToken} = require('./seed');
 const io = require('socket.io-client');
 const _ = require('lodash');
 
@@ -10,7 +10,7 @@ function updateTest() {
     const info = _.pick(completeUsers[0], ['status', 'summary', 'profession', 'work', 'skills', 'experiences']);
 
     describe('update', () => {
-        let initialUser; let socket;        
+        let initialUser; let socket; let client1;
 
         beforeEach((done) => {
             User.remove({}).then(() => {
@@ -27,7 +27,14 @@ function updateTest() {
                 });
             }); 
         });
+        beforeEach(done => {
+            client1 = io.connect(url, {
+                'query': 'token=' + exampleToken + '&userId=' + initialUser._id
+            });
+            client1.on('connect', () => done());
+        });
         afterEach((done) => {
+            client1.disconnect();
             socket.disconnect();
             done();
         });
@@ -55,7 +62,8 @@ function updateTest() {
 
         it('should not update if summary invalid', (done) => {
             socket.emit('/self/update', {summary: ''});
-            socket.on('/self/update/fail', () => {
+            socket.on('/self/update/fail', err => {
+                console.log(err.message);
                 User.findById(initialUser._id).then(user => {                    
                     expect(user.summary).toBe(null);
                     done();
@@ -65,7 +73,8 @@ function updateTest() {
 
         it('should return validation error if experience invalid', (done) => {
             socket.emit('/self/update', {experiences: [{name:''}]});
-            socket.on('/self/update/fail', () => {
+            socket.on('/self/update/fail', err => {
+                console.log(err.message);
                 User.findById(initialUser._id).then(user => {                    
                     expect(user.summary).toBe(null);
                     done();
@@ -75,7 +84,8 @@ function updateTest() {
 
         it('should return validation error if skills invalid', (done) => {
             socket.emit('/self/update', {skills: ['']});
-            socket.on('/self/update/fail', () => {
+            socket.on('/self/update/fail', err => {
+                console.log(err.message);
                 User.findById(initialUser._id).then(user => {                    
                     expect(user.summary).toBe(null);
                     done();
@@ -84,7 +94,16 @@ function updateTest() {
         });
 
         it('should update user and broadcast', (done) => {
-            done();
+            socket.emit('/self/update', info);
+            client1.on('/user/update', (user) => {
+                expect(user.experiences.length).toBe(info.experiences.length);
+                expect(user.skills).toMatch(info.skills);
+                expect(user.work).toBe(info.work);
+                expect(user.profession).toBe(info.profession);
+                expect(user.summary).toBe(info.summary);
+                expect(user.status).toBe(info.status);
+                done();
+            });            
         });
     });
 }

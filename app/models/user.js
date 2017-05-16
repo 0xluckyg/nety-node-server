@@ -111,9 +111,9 @@ const UserSchema = new mongoose.Schema({
             trim: true
         }
     }],
-    loc: {
-        type: [Number],
-        index: '2dsphere'
+    loc: {   
+        type: {type: String},
+        coordinates: []
     },
     profilePicture: {
         type: String,

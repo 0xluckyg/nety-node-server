@@ -17,6 +17,7 @@ function updateUser(socket) {
                 return socket.emit('/criticalError');
             }
             socket.emit('/self/update/success', res);            
+            socket.broadcast.emit('/user/update', res);
         }).catch((err) => {
             socket.emit('/self/update/fail', err);
         });        

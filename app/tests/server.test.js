@@ -16,3 +16,5 @@ const {getContactsTest, deleteContactTest} = require('./contact.test');
 // socketConnectTest();
 
 updateTest();
+getUserByTokenTest();
+getUserByIdTest();

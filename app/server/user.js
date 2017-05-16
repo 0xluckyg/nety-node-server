@@ -3,36 +3,36 @@ const {ObjectID} = require('mongodb');
 
 function updateUser(socket) {
     socket.on('/self/update', user => {
-        // const _id = socket.userId;
+        const _id = socket.userId;
 
-        // if (!ObjectID.isValid(_id)) {
-        //     return socket.emit('/criticalError', user);
-        // }
+        if (!ObjectID.isValid(_id)) {
+            return socket.emit('/criticalError');
+        }
 
-        // User.findOneAndUpdate({_id}, {$set: user}, {new: true}).then((user) => {
-        //     if (!user) {
-        //         return socket.emit('/criticalError', user);
-        //     }
-        //     socket.emit('/me/update/success', user);
-        // }).catch((err) => {
-        //     socket.emit('/me/update/fail', {err});
-        // });
-
-        socket.emit('/self/update/success');
+        User.findOneAndUpdate(
+            {_id}, {$set: user}, 
+            {new: true, runValidators: true})
+        .then((res) => {
+            if (!res) {
+                return socket.emit('/criticalError');
+            }
+            socket.emit('/self/update/success', res);            
+        }).catch((err) => {
+            socket.emit('/self/update/fail', err);
+        });        
     });
 }
 
 function getUserByToken(socket) {
-    socket.on('/user/getByToken', () => {
+    socket.on('/self/getByToken', () => {
         User.findByToken(socket.userToken).then(user => {
             if (!user) {
                 return socket.emit('/criticalError', user);
             }
-
-            socket.emit('/user/getByToken/success', user);
+            socket.emit('/self/getByToken/success', user);
 
         }).catch(err => {
-            socket.emit('/user/getByToken/fail', err);
+            socket.emit('/self/getByToken/fail', err);
         });
     });
 }

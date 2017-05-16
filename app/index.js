@@ -29,8 +29,8 @@ login(app);
 io.use(authenticateToken);
 
 io.on('connection', socket => {           
-    //Make client pass on userId as a query , and set userId to socket object
-    socket.userId = new ObjectID(socket.handshake.query.userId);
+    //Make client pass on userId as a query , and set userId to socket object    
+    socket.userId = new ObjectID(socket.handshake.query.userId);    
     //Save token to the socket object
     socket.userToken = socket.handshake.query.token;
 
@@ -38,8 +38,8 @@ io.on('connection', socket => {
     socket.join(socket.userId);
 
     // //USER
-    // getUserByToken(socket);
-    // getUserById(socket);
+    getUserByToken(socket);
+    getUserById(socket);
     updateUser(socket);
 
     // //NETWORK

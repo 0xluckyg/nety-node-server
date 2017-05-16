@@ -2,13 +2,15 @@ const expect = require('expect');
 const request = require('supertest');
 const {server} = require('../index');
 const {User} = require('../models/user');
-const {users, completeUsers, exampleToken, url} = require('./seed');
+const {users, completeUsers, url} = require('./seed');
 const io = require('socket.io-client');
 const _ = require('lodash');
 
 function updateTest() {
+    const info = _.pick(completeUsers[0], ['status', 'summary', 'profession', 'work', 'skills', 'experiences']);
+
     describe('update', () => {
-        let user; let socket;
+        let initialUser; let socket;        
 
         beforeEach((done) => {
             User.remove({}).then(() => {
@@ -17,8 +19,10 @@ function updateTest() {
                 .send(users[0])
                 .end((err, res) => {
                     if (err) { throw Error(err); }
-                    user = res.body;                    
-                    socket = io.connect(url, {'query': 'token=' + res.headers['x-auth']});                    
+                    initialUser = res.body;                    
+                    socket = io.connect(url, {
+                        'query': 'token=' + res.headers['x-auth'] + '&userId=' + initialUser._id
+                    });       
                     socket.on('connect', () => done());                    
                 });
             }); 
@@ -29,15 +33,54 @@ function updateTest() {
         });
 
         it('should successfully update user', (done) => {
-            socket.emit('/self/update', user);
-            socket.on('/self/update/success', () => {                
-                console.log('happy fuck');                
-                done();
+            socket.emit('/self/update', info);
+            socket.on('/self/update/success', res => {
+                expect(res.experiences.length).toBe(info.experiences.length);
+                expect(res.skills).toMatch(info.skills);
+                expect(res.work).toBe(info.work);
+                expect(res.profession).toBe(info.profession);
+                expect(res.summary).toBe(info.summary);
+                expect(res.status).toBe(info.status);                
+                User.findById(initialUser._id).then(user => {
+                    expect(user.experiences.length).toBe(info.experiences.length);
+                    expect(user.skills).toMatch(info.skills);
+                    expect(user.work).toBe(info.work);
+                    expect(user.profession).toBe(info.profession);
+                    expect(user.summary).toBe(info.summary);
+                    expect(user.status).toBe(info.status);
+                    done();
+                });
             });
         });
 
-        it('should return validation error if request invalid', (done) => {
-            done();
+        it('should not update if summary invalid', (done) => {
+            socket.emit('/self/update', {summary: ''});
+            socket.on('/self/update/fail', () => {
+                User.findById(initialUser._id).then(user => {                    
+                    expect(user.summary).toBe(null);
+                    done();
+                });                
+            });
+        });
+
+        it('should return validation error if experience invalid', (done) => {
+            socket.emit('/self/update', {experiences: [{name:''}]});
+            socket.on('/self/update/fail', () => {
+                User.findById(initialUser._id).then(user => {                    
+                    expect(user.summary).toBe(null);
+                    done();
+                });                
+            });
+        });
+
+        it('should return validation error if skills invalid', (done) => {
+            socket.emit('/self/update', {skills: ['']});
+            socket.on('/self/update/fail', () => {
+                User.findById(initialUser._id).then(user => {                    
+                    expect(user.summary).toBe(null);
+                    done();
+                });                
+            });
         });
 
         it('should update user and broadcast', (done) => {
@@ -48,12 +91,44 @@ function updateTest() {
 
 function getUserByTokenTest() {
     describe('get user by token', () => {
-        it ('should return a valid user', (done) => {
+        let initialUser; let socket;
 
+        beforeEach((done) => {
+            User.remove({}).then(() => {
+                request(server)
+                .post('/signup')
+                .send(users[0])
+                .end((err, res) => {
+                    if (err) { throw Error(err); }
+                    initialUser = res.body;                               
+                    socket = io.connect(url, {
+                        'query': 'token=' + res.headers['x-auth'] + '&userId=' + initialUser._id
+                    });       
+                    socket.on('connect', () => done());                    
+                });
+            }); 
+        });
+        afterEach((done) => {
+            socket.disconnect();
+            done();
         });
 
-        it ('should return error if token invalid', (done) => {
+        it('should return a valid user', (done) => {
+            socket.emit('/self/getByToken');
+            socket.on('/self/getByToken/success', res => {
+                expect(res._id).toBe(initialUser._id);
+                User.findById(initialUser._id).then(user => {                    
+                    expect(user._id + '').toBe(initialUser._id);                    
+                    done();
+                });                
+            });
+        });
 
+        it('should return error if token invalid', (done) => {
+            socket.emit('/self/getByToken');
+            socket.on('/self/getByToken/fail', () => {
+                done();
+            });
         });
     });
 }

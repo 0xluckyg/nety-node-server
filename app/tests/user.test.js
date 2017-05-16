@@ -123,24 +123,52 @@ function getUserByTokenTest() {
                 });                
             });
         });
-
-        it('should return error if token invalid', (done) => {
-            socket.emit('/self/getByToken');
-            socket.on('/self/getByToken/fail', () => {
-                done();
-            });
-        });
     });
 }
 
 function getUserByIdTest() {
     describe('get user by id', () => {
-        it ('should return a valid user', (done) => {
+        let initialUser; let socket;
 
+        beforeEach((done) => {
+            User.remove({}).then(() => {
+                request(server)
+                .post('/signup')
+                .send(users[0])
+                .end((err, res) => {
+                    if (err) { throw Error(err); }
+                    initialUser = res.body;                               
+                    socket = io.connect(url, {
+                        'query': 'token=' + res.headers['x-auth'] + '&userId=' + initialUser._id
+                    });       
+                    socket.on('connect', () => done());                    
+                });
+            }); 
+        });
+        afterEach((done) => {
+            socket.disconnect();
+            done();
         });
 
-        it ('should return error if id invalid', (done) => {
+        it('should return a valid user', (done) => {
+            socket.emit('/user/getById', initialUser._id);
+            socket.on('/user/getById/success', res => {
+                expect(res._id).toBe(initialUser._id);
+                User.findById(initialUser._id).then(user => {                    
+                    expect(user._id + '').toBe(initialUser._id);                    
+                    done();
+                });                
+            });
+        });
 
+        it('should return error if token invalid', (done) => {
+            socket.emit('/user/getById', 'nonvalidid');
+            socket.on('/user/getById/fail', () => {                
+                User.findById(initialUser._id).then(user => {                    
+                    expect(user._id + '').toBe(initialUser._id);                    
+                    done();
+                });      
+            });
         });
     })
 }

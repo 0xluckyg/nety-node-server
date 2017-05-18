@@ -112,8 +112,15 @@ const UserSchema = new mongoose.Schema({
         }
     }],
     loc: {   
-        type: {type: String},
-        coordinates: []
+        type: {
+            type: String,
+            default: "Point",
+            enum: "Point"           
+        },
+        coordinates: {
+            type: [Number],
+            default: [0,0]
+        }
     },
     profilePicture: {
         type: String,
@@ -137,6 +144,8 @@ const UserSchema = new mongoose.Schema({
     }],
     contacts: [mongoose.Schema.Types.ObjectId]
 });
+
+UserSchema.index({loc: '2dsphere'});
 UserSchema.plugin(uniqueValidator, { message: 'This email is taken. Please try another email' });
 
 //Overrides original toJSON. called in JSON.stringify when sending

@@ -11,12 +11,15 @@ const {logoutTest, blockTest, unblockTest, discoverySettingTest} = require('./se
 const {getNetworkTest} = require('./network.test');
 const {getContactsTest, deleteContactTest} = require('./contact.test');
 
-//login
-signupTest();
-loginTest();
-socketConnectTest();
+// //login
+// signupTest();
+// loginTest();
+// socketConnectTest();
 
-//user
-updateTest();
-getUserByTokenTest();
-getUserByIdTest();
+// //user
+// updateTest();
+// getUserByTokenTest();
+// getUserByIdTest();
+
+//network
+getNetworkTest();

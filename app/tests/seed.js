@@ -3,6 +3,7 @@ const {server} = require('../index');
 const {User} = require('../models/user');
 const exampleToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTFhMTlmNDNiNWIyNjI2YTViMTEyMTQiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNDk0ODgyODA1fQ.Zz4XZw0qslzNcW2oQhIYWJCkyODi_Rm5wef-qExi8n4'
 const url = 'http://localhost:3000';
+const io = require('socket.io-client');
 
 const users = [
     {
@@ -78,9 +79,24 @@ const completeUsers = [
     }
 ];
 
+function signupUserAndGetSocket(user, callback) {    
+    request(server)
+    .post('/signup')
+    .send(user)
+    .end((err, res) => {        
+        if (err) { throw Error(err); }                   
+        const socket = io.connect(url, {
+            'query': 'token=' + res.headers['x-auth'] + '&userId=' + res.body._id
+        });
+        socket.on('connect', () => callback(socket, res.body));
+    });
+}
+
 module.exports = {
     users,
     completeUsers,
     exampleToken,
-    url
+    url,
+
+    signupUserAndGetSocket
 };

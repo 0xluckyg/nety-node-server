@@ -10,7 +10,7 @@ const {authenticateToken} = require('./middleware/authenticate');
 const {signup, login} = require('./server/authentication');
 const {getChatrooms, sendMessage, deleteChat} = require('./server/chat');
 const {getContacts, deleteContact} = require('./server/contact');
-const {getNetwork} = require('./server/network');
+const {getNetwork, updateLocation} = require('./server/network');
 const {logoutUser, blockUser, unblockUser, changeDiscoverableSetting} = require('./server/settings');
 const {getUserById, getUserByToken, updateUser} = require('./server/user');
 
@@ -35,7 +35,7 @@ io.on('connection', socket => {
     socket.userToken = socket.handshake.query.token;
 
     //This is to join the user by user's own Id so that other users can send messages to the user's socket.
-    socket.join(socket.userId);
+    socket.join(`${socket.userId}`);
 
     // //USER
     getUserByToken(socket);
@@ -43,7 +43,8 @@ io.on('connection', socket => {
     updateUser(socket);
 
     // //NETWORK
-    // getNetwork(socket);
+    getNetwork(socket);
+    updateLocation(socket, io);
 
     // //CONTACTS
     // getContacts(socket);

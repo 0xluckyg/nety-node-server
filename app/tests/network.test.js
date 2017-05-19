@@ -6,8 +6,11 @@ const {users, completeUsers, url, exampleToken, signupUserAndGetSocket} = requir
 const io = require('socket.io-client');
 
 function getNetworkTest() {
+    //Saint Marks Place
     const saintMarks = [-73.98767179999999,40.7285977];
+    //Columbia University. 9km away from client 1
     const columbia = [-73.96257270000001, 40.8075355];
+    //Brooklyn Museum. 15.1km away from client2. 6.6km away from client1
     const brooklynMuseum = [-73.963631, 40.671206];
     describe('get network', () => {
         let client1; let client2; let client3; let user1; let user2; let user3;
@@ -31,12 +34,9 @@ function getNetworkTest() {
                 });
             }          
         });
-        beforeEach(done => {
-            //Saint Marks Place
-            client1.emit('/self/updateLocation', saintMarks);
-            //Columbia University. 9km away from client 1
-            client2.emit('/self/updateLocation', columbia);
-            //Brooklyn Museum. 15.1km away from client2. 6.6km away from client1
+        beforeEach(done => {            
+            client1.emit('/self/updateLocation', saintMarks);            
+            client2.emit('/self/updateLocation', columbia);            
             client3.emit('/self/updateLocation', brooklynMuseum);
             let doneCount = 0;
             function doneAfter() {
@@ -54,7 +54,7 @@ function getNetworkTest() {
             let doneCount = 0;
             function doneAfter() {
                 doneCount++;
-                if (doneCount === 3) { done(); }
+                if (doneCount === 3) { server.close(); done(); }
             }
             client3.on('disconnected', doneAfter);
             client2.on('disconnected', doneAfter);                                    
@@ -62,54 +62,49 @@ function getNetworkTest() {
             done();            
         });
 
-        // it('should update location correctly', done => {            
-        //     const update = [-73.98767189999999, 40.7285977];
-        //     client1.emit('/self/updateLocation', update);
-        //     client1.on('/self/updateLocation/success', loc => {
-        //         expect(loc[0]).toBe(update[0]);
-        //         expect(loc[1]).toBe(update[1]);                
-        //         done();
-        //     });
-        // });
+        it('should update location correctly', done => {            
+            const update = [-73.98767189999999, 40.7285977];
+            client1.emit('/self/updateLocation', update);
+            client1.on('/self/updateLocation/success', loc => {
+                expect(loc[0]).toBe(update[0]);
+                expect(loc[1]).toBe(update[1]);                
+                done();
+            });
+        });
 
-        // it('should update location correctly and broadcast', done => {            
-        //     console.log('TEST 2');
-        //     const update = [-73.98767179999999, 40.7285977];
-        //     client1.emit('/self/updateLocation', update);
-        //     let doneCount = 0;
-        //     function doneAfter() {
-        //         doneCount++;
-        //         if (doneCount === 2) { done(); }
-        //     }
-        //     client3.on('/user/updateLocation', user => {             
-        //         expect(user._id + '').toBe(user1._id + '');
-        //         expect(user.loc[0]).toBe(update[0]);
-        //         expect(user.loc[1]).toBe(update[1]);                
-        //         doneAfter();         
-        //     });
-        //     client2.on('/user/updateLocation', user => {             
-        //         expect(user._id + '').toBe(user1._id + '');
-        //         expect(user.loc[0]).toBe(update[0]);
-        //         expect(user.loc[1]).toBe(update[1]);                
-        //         doneAfter();        
-        //     });
-        // });
-
-        it('should update location correctly and broadcast', done => {            
-            console.log('TEST 3');
+        it('should update location correctly and broadcast to right users', done => {            
             const update = [-73.98767179999999, 40.7285977];
-            client2.emit('/self/updateLocation', update);                        
-            // client3.on('/user/updateLocation', user => {             
-            //     expect(user._id + '').toBe(user1._id + '');
-            //     expect(user.loc[0]).toBe(update[0]);
-            //     expect(user.loc[1]).toBe(update[1]);                
-            //     done();         
-            // });
-            client1.on('/user/updateLocation', user => {             
+            client1.emit('/self/updateLocation', update);
+            let doneCount = 0;
+            function doneAfter() {
+                doneCount++;
+                if (doneCount === 2) { done(); }
+            }
+            client3.on('/user/updateLocation', user => {             
                 expect(user._id + '').toBe(user1._id + '');
                 expect(user.loc[0]).toBe(update[0]);
                 expect(user.loc[1]).toBe(update[1]);                
+                doneAfter();         
+            });
+            client2.on('/user/updateLocation', user => {             
+                expect(user._id + '').toBe(user1._id + '');
+                expect(user.loc[0]).toBe(update[0]);
+                expect(user.loc[1]).toBe(update[1]);                
+                doneAfter();        
+            });
+        });
+
+        it('should update location correctly and broadcast', done => {                        
+            const update = [-73.98767179999999, 40.7285977];
+            client2.emit('/self/updateLocation', update);
+            client1.on('/user/updateLocation', user => {                             
+                expect(user._id + '').toBe(user2._id + '');
+                expect(user.loc[0]).toBe(update[0]);
+                expect(user.loc[1]).toBe(update[1]);                
                 done();        
+            });
+            client3.on('/user/updateLocation', user => {
+                throw Error(user);
             });
         });
 

@@ -32,6 +32,7 @@ function updateLocation(socket, io) {
             {new: true, runValidators: true}            
         ).then((res) => {                        
             socket.emit('/self/updateLocation/success', newLoc);            
+            // console.log('wtf',res.loc);
             findUsersNearAndNotify(res.loc);
         }).catch(err => {
             socket.emit('/self/updateLocation/fail', err);
@@ -47,16 +48,18 @@ function updateLocation(socket, io) {
                 }
             },
             _id: { $ne:socket.userId }
-        },{ loc: 1 }).then(users => {            
+        },{ loc: 1, name: 1 }).then(users => {            
             if (!users || users.length === 0) {
                 return;
-            }
-            console.log('SOCKET',io.sockets);
+            }            
             users.forEach(user => {
-                console.log(getDist(user.loc.coordinates, location.coordinates));
-                const userLocation = {_id: user._id, loc: user.loc.coordinates};
-                io.sockets.in(`${user._id}`).emit('/user/updateLocation', userLocation);                
-            });             
+                console.log(user.name, users.length);
+                // console.log(getDist(user.loc.coordinates, location.coordinates));                
+                const userLocation = {_id: socket.userId, loc: location.coordinates};
+                // console.log('hm', userLocation);
+                io.to(`${user._id}`).emit('/user/updateLocation', userLocation);                
+            });
+            // console.log('END')
         });
     }
 }

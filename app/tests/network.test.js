@@ -51,47 +51,87 @@ function getNetworkTest() {
             client1.disconnect();
             client2.disconnect();
             client3.disconnect();
-            User.remove({}).then(() => done());
+            let doneCount = 0;
+            function doneAfter() {
+                doneCount++;
+                if (doneCount === 3) { done(); }
+            }
+            client3.on('disconnected', doneAfter);
+            client2.on('disconnected', doneAfter);                                    
+            client1.on('disconnected', doneAfter);                                              
+            done();            
         });
 
-        it('should update location correctly', done => {
-            client1.emit('/self/updateLocation', [40.7285977, -73.98767189999999]);
-            client1.on('/self/updateLocation/success', loc => {
-                expect(loc[0]).toBe(40.7285977);
-                expect(loc[1]).toBe(-73.98767189999999);
-                done();
+        // it('should update location correctly', done => {            
+        //     const update = [-73.98767189999999, 40.7285977];
+        //     client1.emit('/self/updateLocation', update);
+        //     client1.on('/self/updateLocation/success', loc => {
+        //         expect(loc[0]).toBe(update[0]);
+        //         expect(loc[1]).toBe(update[1]);                
+        //         done();
+        //     });
+        // });
+
+        // it('should update location correctly and broadcast', done => {            
+        //     console.log('TEST 2');
+        //     const update = [-73.98767179999999, 40.7285977];
+        //     client1.emit('/self/updateLocation', update);
+        //     let doneCount = 0;
+        //     function doneAfter() {
+        //         doneCount++;
+        //         if (doneCount === 2) { done(); }
+        //     }
+        //     client3.on('/user/updateLocation', user => {             
+        //         expect(user._id + '').toBe(user1._id + '');
+        //         expect(user.loc[0]).toBe(update[0]);
+        //         expect(user.loc[1]).toBe(update[1]);                
+        //         doneAfter();         
+        //     });
+        //     client2.on('/user/updateLocation', user => {             
+        //         expect(user._id + '').toBe(user1._id + '');
+        //         expect(user.loc[0]).toBe(update[0]);
+        //         expect(user.loc[1]).toBe(update[1]);                
+        //         doneAfter();        
+        //     });
+        // });
+
+        it('should update location correctly and broadcast', done => {            
+            console.log('TEST 3');
+            const update = [-73.98767179999999, 40.7285977];
+            client2.emit('/self/updateLocation', update);                        
+            // client3.on('/user/updateLocation', user => {             
+            //     expect(user._id + '').toBe(user1._id + '');
+            //     expect(user.loc[0]).toBe(update[0]);
+            //     expect(user.loc[1]).toBe(update[1]);                
+            //     done();         
+            // });
+            client1.on('/user/updateLocation', user => {             
+                expect(user._id + '').toBe(user1._id + '');
+                expect(user.loc[0]).toBe(update[0]);
+                expect(user.loc[1]).toBe(update[1]);                
+                done();        
             });
         });
 
-        it('should update location correctly and broadcast', done => {
-            client1.emit('/self/updateLocation', [40.7285977, -73.98767179999999]);
-            client2.on('/user/updateLocation', user => {             
-                expect(user._id + '').toBe(user2._id + '');
-                expect(user.loc[0]).toBe(40.7285977);
-                expect(user.loc[1]).toBe(-73.98767189999999);
-                done();
-            });
-        });
+        // it('should return users in 10km radius', done => {
+        //     done();
+        // });
 
-        it('should return users in 10km radius', done => {
-            done();
-        });
+        // it('should not return blocked user', done => {
+        //     done();
+        // });
 
-        it('should not return blocked user', done => {
-            done();
-        });
+        // it('should not return user who blocked self', done => {
+        //     done();
+        // });
 
-        it('should not return user who blocked self', done => {
-            done();
-        });
+        // it('should broadcast user after signup', done => {
+        //     done();
+        // });
 
-        it('should broadcast user after signup', done => {
-            done();
-        });
-
-        it('should broadcast user after login', done => {
-            done();
-        });
+        // it('should broadcast user after login', done => {
+        //     done();
+        // });
 
     });
 }

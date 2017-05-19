@@ -38,9 +38,9 @@ io.on('connection', socket => {
     socket.join(`${socket.userId}`);
 
     // //USER
-    getUserByToken(socket);
-    getUserById(socket);
-    updateUser(socket);
+    // getUserByToken(socket);
+    // getUserById(socket);
+    // updateUser(socket);
 
     // //NETWORK
     getNetwork(socket);
@@ -60,6 +60,9 @@ io.on('connection', socket => {
     // blockUser(socket);
     // unblockUser(socket);
     // changeDiscoverableSetting(socket);
+    socket.on('disconnect', () => {
+        socket.emit('disconnected');
+    })
 });
 
 server.listen(port, () => {

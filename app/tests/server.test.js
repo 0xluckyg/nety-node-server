@@ -26,4 +26,5 @@ const {getContactsTest, deleteContactTest} = require('./contact.test');
 
 //settings
 // logoutTest();
-blockTest();
+// blockTest();
+unblockTest();

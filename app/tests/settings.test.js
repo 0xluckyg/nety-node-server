@@ -101,7 +101,7 @@ function logoutTest() {
 
 function blockTest() {
     describe('block user', () => {
-        let client1; let client2; let user1; let user2;
+        let client1; let client2; let client3; let user1; let user2; let user3;
         beforeEach((done) => {
             User.remove({}).then(() => signupMany());  
             
@@ -112,29 +112,33 @@ function blockTest() {
                     signupUserAndGetSocket(users[1], (socket, user) => {
                         client2 = socket;
                         user2 = user;
-                        done();
+                        signupUserAndGetSocket(users[2], (socket, user) => {
+                            client3 = socket;
+                            user3 = user;
+                            done();
+                        });
                     });
                 });
             }
         });
         afterEach(done => {
             client1.disconnect();
-            client2.disconnect();            
+            client2.disconnect();    
+            client3.disconnect();        
             done();
         });
 
         it('should block user and notify self', (done) => {
             client1.emit('/self/blockUser', user2._id);
-            client1.on('/self/blockUser/success', uid => {
+            client1.on('/self/blockUser/success', () => {
                 User.findById(user1._id).then(user => {
-                    expect(user.blocked).toInclude(user2._id);
-                    expect(uid +'').toBe(user1._id);
+                    expect(user.blocked).toInclude(user2._id);                    
                     done();
                 });                
             });            
         });
 
-        it ('should block user and notify other user', (done) => {
+        it('should block user and notify other user', (done) => {
             client1.emit('/self/blockUser', user2._id);
             client2.on('/user/blocked', uid => {
                 User.findById(user1._id).then(user => {
@@ -144,17 +148,81 @@ function blockTest() {
                 });                
             });
         });
+
+        it('should block user and not notify irrelevant users', (done) => {
+            client1.emit('/self/blockUser', user2._id);
+            client3.on('/user/blocked', uid => {
+                throw Error(uid);
+            });
+            setTimeout(() => {
+                done();
+            }, 500);
+        });
     });
 }
 
 function unblockTest() {
     describe('unblock user', () => {
-        it ('should unblock user and notify self', (done) => {
-
+        let client1; let client2; let client3; let user1; let user2; let user3;
+        beforeEach((done) => {
+            User.remove({}).then(() => signupMany());  
+            
+            function signupMany() {
+                signupUserAndGetSocket(users[0], (socket, user) => {
+                    client1 = socket;
+                    user1 = user;
+                    signupUserAndGetSocket(users[1], (socket, user) => {
+                        client2 = socket;
+                        user2 = user;
+                        signupUserAndGetSocket(users[2], (socket, user) => {
+                            client3 = socket;
+                            user3 = user;
+                            done();
+                        });
+                    });
+                });
+            }
+        });
+        beforeEach(done => {
+            client1.emit('/self/blockUser', user2._id);
+            client1.on('/self/blockUser/success', () => {
+                done();
+            });
+        });
+        afterEach(done => {
+            client1.disconnect();
+            client2.disconnect();    
+            client3.disconnect();        
+            done();
+        });
+        
+        it('should unblock user and notify self', (done) => {
+            client1.emit('/self/unblockUser', user2._id);
+            client1.on('/self/unblockUser/success', () => {
+                User.findById(user1._id).then(user => {
+                    expect(user.blocked).toExclude(user2._id);
+                    expect(user.blocked.length).toBe(0);
+                    done();
+                });            
+            });
         });
 
-        it ('should unblock user and notify other user', (done) => {
+        it('should unblock user and notify other user', (done) => {
+            client1.emit('/self/unblockUser', user2._id);
+            client2.on('/user/unblocked', uid => {
+                expect(uid + '').toBe(user1._id);
+                done();                
+            });
+        });
 
+        it('should unblock user and not notify irrelevant users', (done) => {
+            client1.emit('/self/unblockUser', user2._id);
+            client3.on('/user/unblocked', uid => {
+                throw Error(uid);
+            });
+            setTimeout(() => {
+                done();
+            }, 500);
         });
     });
 }

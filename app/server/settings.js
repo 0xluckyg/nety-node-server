@@ -50,14 +50,13 @@ function blockUser(socket) {
         User.findOneAndUpdate(
             {_id: socket.userId},
             {$push: {blocked: userToBlockId}},
-            {new: true},
-            {_id: 1}
+            {new: true, runValidators: true}            
         ).then(user => {
             if (!user) {
                 return socket.emit('/self/blockUser/fail', 'no user');
             }
-            socket.emit('/self/blockUser/success');
-            socket.to(userToBlockId).emit('user/blocked', user._id);
+            socket.emit('/self/blockUser/success');            
+            socket.to(userToBlockId).emit('/user/blocked', user._id);
         }).catch(err => {
             socket.emit('/self/blockUser/fail', err);
         });
@@ -69,8 +68,7 @@ function unblockUser(socket) {
         User.findOneAndUpdate(
             {_id: socket.userId},
             {$pull: {blocked: userToUnblockId}},
-            {new: true},
-            {_id: 1}
+            {new: true, runValidators: true}            
         ).then(user => {
             if (!user) {
                 return socket.emit('/self/unblockUser/fail', 'no user');

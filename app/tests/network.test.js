@@ -2,10 +2,10 @@ const expect = require('expect');
 const request = require('supertest');
 const {server} = require('../index');
 const {User} = require('../models/user');
-const {users, completeUsers, url, exampleToken, signupUserAndGetSocket} = require('./seed');
+const {users, completeUsers, exampleToken, signupUserAndGetSocket} = require('./seed');
 const io = require('socket.io-client');
 
-function getNetworkTest() {
+function networkTest() {
     //Saint Marks Place
     const saintMarks = [-73.98767179999999,40.7285977];
     //Columbia University. 9km away from client 1
@@ -45,21 +45,13 @@ function getNetworkTest() {
             }
             client3.on('/self/updateLocation/success', doneAfter);
             client2.on('/self/updateLocation/success', doneAfter);                                    
-            client1.on('/self/updateLocation/success', doneAfter);                                  
+            client1.on('/self/updateLocation/success', doneAfter);
         });     
         afterEach(done => {
             client1.disconnect();
             client2.disconnect();
-            client3.disconnect();
-            let doneCount = 0;
-            function doneAfter() {
-                doneCount++;
-                if (doneCount === 3) { server.close(); done(); }
-            }
-            client3.on('disconnected', doneAfter);
-            client2.on('disconnected', doneAfter);                                    
-            client1.on('disconnected', doneAfter);                                              
-            done();            
+            client3.disconnect();            
+            done();
         });
 
         it('should update location correctly', done => {            
@@ -72,7 +64,7 @@ function getNetworkTest() {
             });
         });
 
-        it('should update location correctly and broadcast to right users', done => {            
+        it('should update location correctly and broadcast to people within max radius', done => {            
             const update = [-73.98767179999999, 40.7285977];
             client1.emit('/self/updateLocation', update);
             let doneCount = 0;
@@ -94,7 +86,7 @@ function getNetworkTest() {
             });
         });
 
-        it('should update location correctly and broadcast', done => {                        
+        it('should update location correctly and not broadcast to people outside max radius', done => {                        
             const update = [-73.98767179999999, 40.7285977];
             client2.emit('/self/updateLocation', update);
             client1.on('/user/updateLocation', user => {                             
@@ -108,10 +100,23 @@ function getNetworkTest() {
             });
         });
 
-        // it('should return users in 10km radius', done => {
-        //     done();
-        // });
+        it('should return users in max radius', done => {
+            client1.emit('/self/getNetwork', saintMarks);
+            client1.on('/self/getNetwork/success', users => {
+                expect(users.length).toBe(2);
+                done();
+            });            
+        });
 
+        it('should not return users outside max radius', done => {
+            client2.emit('/self/getNetwork', columbia);
+            client2.on('/self/getNetwork/success', users => {
+                expect(users.length).toBe(1);
+                expect(users[0]._id).toBe(user1._id);
+                done();
+            });            
+        });
+        
         // it('should not return blocked user', done => {
         //     done();
         // });
@@ -120,11 +125,7 @@ function getNetworkTest() {
         //     done();
         // });
 
-        // it('should broadcast user after signup', done => {
-        //     done();
-        // });
-
-        // it('should broadcast user after login', done => {
+        // it('should not return user who set discovery settings off', done => {
         //     done();
         // });
 
@@ -132,5 +133,5 @@ function getNetworkTest() {
 }
 
 module.exports = {
-    getNetworkTest
+    networkTest
 };

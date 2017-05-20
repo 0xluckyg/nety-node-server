@@ -37,10 +37,10 @@ io.on('connection', socket => {
     //This is to join the user by user's own Id so that other users can send messages to the user's socket.
     socket.join(`${socket.userId}`);
 
-    // //USER
-    // getUserByToken(socket);
-    // getUserById(socket);
-    // updateUser(socket);
+    //USER
+    getUserByToken(socket);
+    getUserById(socket);
+    updateUser(socket);
 
     // //NETWORK
     getNetwork(socket);
@@ -56,13 +56,15 @@ io.on('connection', socket => {
     // deleteChat(socket);
 
     // //SETTINGS
-    // logoutUser(socket);
-    // blockUser(socket);
-    // unblockUser(socket);
-    // changeDiscoverableSetting(socket);
+    logoutUser(socket, io);
+    blockUser(socket);
+    unblockUser(socket);
+    changeDiscoverableSetting(socket, io);
+
+    //DISCONNECT
     socket.on('disconnect', () => {
         socket.emit('disconnected');
-    })
+    });
 });
 
 server.listen(port, () => {

@@ -63,7 +63,7 @@ function updateTest() {
         it('should not update if summary invalid', (done) => {
             socket.emit('/self/update', {summary: ''});
             socket.on('/self/update/fail', err => {
-                console.log(err.message);
+                console.log(err.name);
                 User.findById(initialUser._id).then(user => {                    
                     expect(user.summary).toBe(null);
                     done();
@@ -74,7 +74,7 @@ function updateTest() {
         it('should return validation error if experience invalid', (done) => {
             socket.emit('/self/update', {experiences: [{name:''}]});
             socket.on('/self/update/fail', err => {
-                console.log(err.message);
+                console.log(err.name);
                 User.findById(initialUser._id).then(user => {                    
                     expect(user.summary).toBe(null);
                     done();
@@ -85,7 +85,7 @@ function updateTest() {
         it('should return validation error if skills invalid', (done) => {
             socket.emit('/self/update', {skills: ['']});
             socket.on('/self/update/fail', err => {
-                console.log(err.message);
+                console.log(err.name);
                 User.findById(initialUser._id).then(user => {                    
                     expect(user.summary).toBe(null);
                     done();
@@ -189,7 +189,7 @@ function getUserByIdTest() {
                 });      
             });
         });
-    })
+    });
 }
 
 module.exports = {

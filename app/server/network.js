@@ -2,6 +2,7 @@ const {User} = require('../models/user');
 //[longitude, latitude]
 
 const maxDist = 10000;
+const maxDistForBroadcast = 15000;
 
 function getNetwork(socket) {
     socket.on('/self/getNetwork', loc => {    
@@ -48,7 +49,7 @@ function updateLocation(socket, io) {
             loc : {
                 $near : {
                     $geometry : location, 
-                    $maxDistance : maxDist
+                    $maxDistance : maxDistForBroadcast
                 }
             },
             _id: { $ne:socket.userId }

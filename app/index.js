@@ -55,10 +55,10 @@ io.on('connection', socket => {
     // sendMessage(socket);
     // deleteChat(socket);
 
-    // //SETTINGS
-    logoutUser(socket, io);
+    // //SETTINGS    
     blockUser(socket);
     unblockUser(socket);
+    logoutUser(socket, io);
     changeDiscoverableSetting(socket, io);
 
     //DISCONNECT

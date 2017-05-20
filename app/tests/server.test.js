@@ -2,8 +2,6 @@ const expect = require('expect');
 const request = require('supertest');
 const {app} = require('../index');
 
-const {populateChatrooms, populateUser, populateMessages} = require('./seed');
-
 const {signupTest, loginTest, socketConnectTest} = require('./authentication.test');
 const {updateTest, getUserByIdTest, getUserByTokenTest} = require('./user.test');
 const {deleteChatTest, sendMessageTest, getChatroomsTest} = require('./chat.test');
@@ -21,10 +19,11 @@ const {getContactsTest, deleteContactTest} = require('./contact.test');
 // getUserByTokenTest();
 // getUserByIdTest();
 
-//network
+// network
 // networkTest();
 
-//settings
+// settings
 // logoutTest();
 // blockTest();
-unblockTest();
+// unblockTest();
+discoverySettingTest();

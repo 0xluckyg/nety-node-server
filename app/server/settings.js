@@ -1,49 +1,7 @@
 const {User} = require('../models/user');
+const _ = require('lodash');
 
 const maxDistForBroadcast = 15000;
-
-function logoutUser(socket, io) {    
-    const token = socket.userToken;    
-    socket.on('/self/logout', () => {        
-        User.findByToken(token).then(user => {            
-            if (!user) {
-                return socket.emit('/criticalError', user);
-            }
-
-            user.removeToken(token).then(() => {
-                findUsersNearAndNotify(user.loc.coordinates);
-            }, () => {
-                return Promise.reject();
-            });
-
-        }).catch(err => {
-            socket.emit('/user/logout/fail', err);
-        });
-    });
-
-    function findUsersNearAndNotify(location) {
-        if (!location || location.constructor !== Array || location.length !== 2) {            
-            socket.emit('/user/logout/success');
-            return;
-        }        
-        User.find({
-            loc : {
-                $near : {
-                    $geometry : { type: "Point", coordinates: location },
-                    $maxDistance : maxDistForBroadcast
-                }
-            },
-            _id: { $ne:socket.userId }
-        },{ loc: 1 }).then(users => {                        
-            if (!users || users.length === 0) { return; }                        
-            users.forEach(user => {                
-                io.to(`${user._id}`).emit('/user/loggedOut', socket.userId);
-            });            
-        }).then(() => {            
-            socket.emit('/self/logout/success');            
-        });
-    }
-}
 
 function blockUser(socket) {
     socket.on('/self/blockUser', userToBlockId => {
@@ -86,8 +44,7 @@ function changeDiscoverableSetting(socket, io) {
         User.findOneAndUpdate(
             {_id: socket.userId},
             {$set: {discoverable}},
-            {new: true},
-            {_id: 1, discoverable: 1, loc: 1}
+            {new: true, runValidators: true}               
         ).then(user => {            
             findUsersNearAndNotify(user);
         }).catch(err => {
@@ -96,8 +53,10 @@ function changeDiscoverableSetting(socket, io) {
     });
 
     function findUsersNearAndNotify(user) {
-        if (!location || location.constructor !== Array || location.length !== 2) {            
-            socket.emit('/self/changeDiscoverable/success');
+        const location = user.loc.coordinates;
+        const send = _.pick(user, ['_id', 'discoverable']);
+        if (!location || location.constructor !== Array || location.length !== 2) {                        
+            socket.emit('/self/changeDiscoverable/success', send.discoverable);
             return;
         }
         User.find({
@@ -108,13 +67,53 @@ function changeDiscoverableSetting(socket, io) {
                 }
             },
             _id: { $ne:socket.userId }
-        },{ loc: 1 }).then(users => {
+        },{ loc: 1 }).then(users => {            
             if (!users || users.length === 0) { return; }
             users.forEach(user => {
-                io.to(`${user._id}`).emit('/user/discoverableChanged', socket.userId);
+                io.to(`${user._id}`).emit('/user/changedDiscoverable', send);
             });
         }).then(() => {
-            socket.emit('/self/changeDiscoverable/success', user.discoverable);
+            socket.emit('/self/changeDiscoverable/success', send.discoverable);
+        });
+    }
+}
+
+function logoutUser(socket, io) {    
+    const token = socket.userToken;    
+    socket.on('/self/logout', () => {        
+        User.findByToken(token).then(user => {            
+            if (!user) {
+                return socket.emit('/criticalError', user);
+            }
+
+            user.removeToken(token).then(() => {
+                findUsersNearAndNotify(user.loc.coordinates);
+            });
+        }).catch(err => {
+            socket.emit('/user/logout/fail', err);
+        });
+    });
+
+    function findUsersNearAndNotify(location) {
+        if (!location || location.constructor !== Array || location.length !== 2) {            
+            socket.emit('/user/logout/success');
+            return;
+        }        
+        User.find({
+            loc : {
+                $near : {
+                    $geometry : { type: "Point", coordinates: location },
+                    $maxDistance : maxDistForBroadcast
+                }
+            },
+            _id: { $ne:socket.userId }
+        },{ loc: 1 }).then(users => {                        
+            if (!users || users.length === 0) { return; }                        
+            users.forEach(user => {                
+                io.to(`${user._id}`).emit('/user/loggedOut', socket.userId);
+            });            
+        }).then(() => {            
+            socket.emit('/self/logout/success');            
         });
     }
 }

@@ -87,6 +87,7 @@ function getContactsTest() {
             client1.on('/self/blockUser/success', () => {                
                 client1.emit('/self/getContacts');
                 client1.on('/self/getContacts/success', users => {
+                    expect(users.length).toBe(8);
                     for (let i = 0; i < users.length; i ++) {
                         expect(users[i]._id + '').toNotBe(user2._id + '');
                         if (i === users.length - 1) { done(); }
@@ -100,7 +101,8 @@ function getContactsTest() {
             client2.on('/self/blockUser/success', () => {                
                 client1.emit('/self/getContacts');
                 client1.on('/self/getContacts/success', users => {
-                    for (let i = 0; i < users.length; i ++) {
+                    expect(users.length).toBe(8);
+                    for (let i = 0; i < users.length; i ++) {                                                
                         expect(users[i]._id + '').toNotBe(user2._id + '');
                         if (i === users.length - 1) { done(); }
                     }
@@ -112,16 +114,52 @@ function getContactsTest() {
 
 function deleteContactTest() {
     describe('delete contact', () => {
+        let client1; let user1; let client2; let user2; let user3;
+        const clientIds = [];
+
+        beforeEach(done => {      
+            User.remove({}).then(() => signupMany());  
+
+            function signupMany() {
+                signupUserAndGetSocket(users[0], (socket, user) => {
+                    client1 = socket;
+                    user1 = user;
+                    signupUserAndGetSocket(users[1], (socket, user) => {
+                        clientIds.push(user._id);
+                        user2 = user; 
+                        client2 = socket;
+                        signupUserAndGetSocket(users[2], (socket, user) => {
+                            clientIds.push(user._id);
+                            user3 = user;
+                            done();
+                        });
+                    });                 
+                });
+            }   
+        });
+        beforeEach(done => {                             
+            User.findOneAndUpdate(
+                {_id: user1._id},
+                {contacts: clientIds}                        
+            ).then(() => {                
+                done();
+            });
+        });
+        afterEach(done => {
+            client1.disconnect();            
+            done();
+        });
+        
         it('should delete contact and notify self', (done) => {
-
-        });
-
-        it('should delete contact and notify other user', (done) => {
-
-        });
-
-        it('should delete contact and delete all corresponding messages', (done) => {
-
+            client1.emit('/self/deleteContact', user2._id);
+            client1.on('/self/deleteContact/success', id => {
+                expect(id + '').toBe(user2._id + '');
+                User.findById(user1._id).then(user => {
+                    expect(user.contacts.length).toBe(1);
+                    expect(user.contacts).toNotContain(id + '');
+                    done();
+                });
+            });
         });
     });
 }

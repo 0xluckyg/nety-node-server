@@ -48,32 +48,33 @@ function updateLocation(socket, io) {
                 }
             },
             {new: true, runValidators: true}            
-        ).then((res) => {                                    
-            findUsersNearAndNotify(res.loc);
+        ).then(res => {                                    
+            findUsersNearAndNotify(res);
         }).catch(err => {
             socket.emit('/self/updateLocation/fail', err);
         });
     });
 
-    function findUsersNearAndNotify(location) {        
+    function findUsersNearAndNotify(res) {        
         User.find({
             loc : {
                 $near : {
-                    $geometry : location, 
+                    $geometry : res.loc,
                     $maxDistance : maxDistForBroadcast
                 }
             },
-            _id: { $ne:socket.userId }
+            _id: {$ne:socket.userId, $nin: res.blocked},            
+            blocked: { $ne: socket.userId }            
         },{ loc: 1 }).then(users => {            
             if (!users || users.length === 0) {
                 return;
             }                        
             users.forEach(user => {                
-                const userLocation = {_id: socket.userId, loc: location.coordinates};                
+                const userLocation = {_id: socket.userId, loc: res.loc.coordinates};
                 io.to(`${user._id}`).emit('/user/updateLocation', userLocation);                
             });            
         }).then(() => {
-            socket.emit('/self/updateLocation/success', location.coordinates);
+            socket.emit('/self/updateLocation/success', res.loc.coordinates);
         });
     }
 }

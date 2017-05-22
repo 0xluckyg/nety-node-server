@@ -9,22 +9,22 @@ const {logoutTest, blockTest, unblockTest, discoverySettingTest} = require('./se
 const {getNetworkTest, updateNetworkTest} = require('./network.test');
 const {getContactsTest, deleteContactTest} = require('./contact.test');
 
-// //login
-// signupTest();
-// loginTest();
-// socketConnectTest();
+//login
+signupTest();
+loginTest();
+socketConnectTest();
 
-// //user
-// updateTest();
-// getUserByTokenTest();
-// getUserByIdTest();
+//user
+updateTest();
+getUserByTokenTest();
+getUserByIdTest();
 
-// // network
+//settings
+logoutTest();
+blockTest();
+unblockTest();
+discoverySettingTest();
+
+//network
 getNetworkTest();
 updateNetworkTest();
-
-// // settings
-// logoutTest();
-// blockTest();
-// unblockTest();
-// discoverySettingTest();

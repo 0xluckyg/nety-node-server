@@ -6,7 +6,7 @@ const {signupTest, loginTest, socketConnectTest} = require('./authentication.tes
 const {updateTest, getUserByIdTest, getUserByTokenTest} = require('./user.test');
 const {deleteChatTest, sendMessageTest, getChatroomsTest} = require('./chat.test');
 const {logoutTest, blockTest, unblockTest, discoverySettingTest} = require('./settings.test');
-const {networkTest} = require('./network.test');
+const {getNetworkTest, updateNetworkTest} = require('./network.test');
 const {getContactsTest, deleteContactTest} = require('./contact.test');
 
 // //login
@@ -19,11 +19,12 @@ const {getContactsTest, deleteContactTest} = require('./contact.test');
 // getUserByTokenTest();
 // getUserByIdTest();
 
-// network
-// networkTest();
+// // network
+getNetworkTest();
+updateNetworkTest();
 
-// settings
+// // settings
 // logoutTest();
 // blockTest();
 // unblockTest();
-discoverySettingTest();
+// discoverySettingTest();

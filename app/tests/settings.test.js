@@ -1,9 +1,6 @@
 const expect = require('expect');
-const request = require('supertest');
-const {server} = require('../index');
 const {User} = require('../models/user');
-const {users, completeUsers, url, exampleToken, signupUserAndGetSocket} = require('./seed');
-const io = require('socket.io-client');
+const {users, signupUserAndGetSocket} = require('./seed');
 
 //Saint Marks Place
 const saintMarks = [-73.98767179999999,40.7285977];

@@ -21,7 +21,7 @@ function sendMessageTest() {
 function deleteChatTest() {
     describe('delete chat', () => {
         it ('should delete chat and notify self', (done) => {
-
+            
         });
     });
 }

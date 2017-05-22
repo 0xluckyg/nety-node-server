@@ -5,26 +5,37 @@ const maxDist = 10000;
 const maxDistForBroadcast = 15000;
 
 function getNetwork(socket) {
-    socket.on('/self/getNetwork', loc => {    
-        User.find({
+    socket.on('/self/getNetwork', loc => {         
+        User.findOne(
+            {_id: socket.userId},
+            {blocked: 1}
+        ).then(user => {                        
+            findUsers(user, loc);
+        });
+    });
+
+    function findUsers(user, loc) {
+        User.find({            
             loc : {
                 $near : {
-                    $geometry : { type : "Point" , coordinates : loc }, 
+                    $geometry : { type : "Point" , coordinates : loc },
                     $maxDistance : maxDist
                 }
             },
-            _id: { $ne:socket.userId }            
+            _id: {$ne:socket.userId, $nin: user.blocked},            
+            blocked: { $ne: socket.userId },
+            discoverable: true
         },{ 
             token: 0,  
             password: 0,
             chatrooms: 0,
             contacts: 0
-        }).then(users => {                
+        }).then(users => {                 
             socket.emit('/self/getNetwork/success', users);
         }).catch(err => {
             socket.emit('/self/getNetwork/fail', err);
         });
-    });
+    }
 }
 
 function updateLocation(socket, io) {

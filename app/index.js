@@ -47,8 +47,8 @@ io.on('connection', socket => {
     updateLocation(socket, io);
 
     // //CONTACTS
-    // getContacts(socket);
-    // deleteContact(socket);
+    getContacts(socket);
+    deleteContact(socket);
 
     // //CHAT
     // getChatrooms(socket);    

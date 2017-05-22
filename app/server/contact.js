@@ -1,51 +1,41 @@
 const {User} = require('../models/user');
 
 function getContacts(socket) {
-    socket.on('/user/getContacts', () => {
-        User.find({_id: socket.userId}).then(user => {
-            if (!user) {
-                Promise.reject();
-            }
-
-            User.find({
-                _id: {$in: user.contacts}
-            }).then(contacts => {
-                if (contacts) {
-                    socket.emit('/user/getChats/success', contacts);
+    socket.on('/self/getContacts', () => {        
+        User.findOne(
+            {_id: socket.userId},
+            {contacts: 1, blocked: 1}
+        ).then(user => {            
+            if (!user) {                
+                socket.emit('/criticalError', 'no user');
+            }            
+            User.find({                
+                _id: {$in: user.contacts, $nin: user.blocked},
+                blocked: { $ne: socket.userId },
+            }).sort(
+                {'name.first': 1}
+            ).then(contacts => {                    
+                if (contacts) {                    
+                    socket.emit('/self/getContacts/success', contacts);
                 }
             });
 
         }).catch(err => {
-            socket.emit('/user/getChats/fail', err);
+            socket.emit('/self/getChats/fail', err);
         });
     });
 }
 
 function deleteContact(socket) {
-    function notifyUsersOfDeletedContact(deletedUserId) {
-        socket.emit('/self/deleteContact/success', deletedUserId);
-        socket.to(deletedUserId).emit('/contact/deletedBy', socket.userId);
-    }
-
-    function deleteUserFromContacts(userToDeleteId) {
+    socket.on('/self/deleteContact', userToDeleteId => {
         User.findOneAndUpdate(
             {_id: socket.userId},
             {$pull: {contacts: userToDeleteId}}
         ).then(() => {
-            User.findOneAndUpdate(
-                {_id: userToDeleteId},
-                {$pull: {contacts: socket.userId}}
-            ).then(() => {
-                notifyUsersOfDeletedContact(userToDeleteId);
-            }).catch(err => {
-                Promise.reject(err);
-            });
+            socket.emit('/self/deleteContact/success', userToDeleteId);            
         }).catch(err => {
             socket.emit('/self/deleteContact/fail', err);
         });
-    }
-    socket.on('/self/deleteContact', userToDeleteId => {
-        deleteUserFromContacts(userToDeleteId);
     });
 }
 

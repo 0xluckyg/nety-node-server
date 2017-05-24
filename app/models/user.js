@@ -195,8 +195,8 @@ UserSchema.statics.findByToken = function(token) {
 
     return User.findOne({
         _id: decoded._id,
-        token
-    });
+        token,        
+    },{contacts: 0, blocked: 0, chatrooms: 0, password: 0, token: 0});
 };
 
 UserSchema.statics.findByCredentials = function(email, password) {

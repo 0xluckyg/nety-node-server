@@ -4,7 +4,7 @@ const {Message} = require('../models/message');
 const {ObjectID} = require('mongodb');
 
 function getChatrooms(socket) {
-    socket.on('/user/getChats', () => {
+    socket.on('/self/getChats', () => {
         User.find({_id: socket.userId}, {chatrooms: 1}).then(userChatrooms => {
             if (!userChatrooms) {
                 Promise.reject();
@@ -14,12 +14,12 @@ function getChatrooms(socket) {
                 _id: {$in: userChatrooms}
             }).then(chatrooms => {
                 if (chatrooms) {
-                    socket.emit('/user/getChats/success', chatrooms);
+                    socket.emit('/self/getChats/success', chatrooms);
                 }
             });
 
         }).catch(err => {
-            socket.emit('/user/getChats/fail', err);
+            socket.emit('/self/getChats/fail', err);
         });
     });
 }
@@ -80,7 +80,7 @@ function sendMessage(socket) {
         });
     }
 
-    socket.on('/message', msg => {
+    socket.on('/self/sendMessage', msg => {
         Chatroom.findById(msg.chatroomId).then(chatroom => {
             if (!chatroom) {
                 createNewChatroom(msg, () => {
@@ -92,7 +92,7 @@ function sendMessage(socket) {
                 });
             }
         }).catch(err => {
-            socket.emit('/message/send/fail', err);
+            socket.emit('/self/sendMessage/fail', err);
         });
     });
 }

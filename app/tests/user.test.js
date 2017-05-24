@@ -41,7 +41,7 @@ function updateTest() {
 
         it('should successfully update user', (done) => {
             socket.emit('/self/update', info);
-            socket.on('/self/update/success', res => {
+            socket.on('/self/update/success', res => {                
                 expect(res.experiences.length).toBe(info.experiences.length);
                 expect(res.skills).toMatch(info.skills);
                 expect(res.work).toBe(info.work);
@@ -135,6 +135,7 @@ function getUserByTokenTest() {
         it('should return a valid user', (done) => {
             socket.emit('/self/getByToken');
             socket.on('/self/getByToken/success', res => {
+                console.log(res);
                 expect(res._id).toBe(initialUser._id);
                 User.findById(initialUser._id).then(user => {                    
                     expect(user._id + '').toBe(initialUser._id);                    

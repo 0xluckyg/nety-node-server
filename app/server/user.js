@@ -1,5 +1,6 @@
 const {User} = require('../models/user');
 const {ObjectID} = require('mongodb');
+const _ = require('lodash');
 
 function updateUser(socket) {
     socket.on('/self/update', user => {
@@ -12,12 +13,13 @@ function updateUser(socket) {
         User.findOneAndUpdate(
             {_id}, {$set: user}, 
             {new: true, runValidators: true})
-        .then((res) => {
+        .then((res) => {            
             if (!res) {
                 return socket.emit('/criticalError');
-            }
-            socket.emit('/self/update/success', res);            
-            socket.broadcast.emit('/user/update', res);
+            }            
+            user._id = _id;
+            socket.emit('/self/update/success', user);
+            socket.broadcast.emit('/user/update', user);
         }).catch((err) => {
             socket.emit('/self/update/fail', err);
         });        
@@ -40,7 +42,9 @@ function getUserByToken(socket) {
 
 function getUserById(socket) {
     socket.on('/user/getById', id => {
-        User.findById(id).then(user => {
+        User.findById(id, {
+            contacts: 0, blocked: 0, chatrooms: 0, password: 0, token: 0
+        }).then(user => {
             if (!user) {
                 return socket.emit('/criticalError', user);
             }

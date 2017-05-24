@@ -90,13 +90,13 @@ function logoutUser(socket, io) {
                 findUsersNearAndNotify(user.loc.coordinates);
             });
         }).catch(err => {
-            socket.emit('/user/logout/fail', err);
+            socket.emit('/self/logout/fail', err);
         });
     });
 
     function findUsersNearAndNotify(location) {
         if (!location || location.constructor !== Array || location.length !== 2) {            
-            socket.emit('/user/logout/success');
+            socket.emit('/self/logout/success');
             return;
         }        
         User.find({

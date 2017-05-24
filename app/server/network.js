@@ -1,4 +1,5 @@
 const {User} = require('../models/user');
+const _ = require('lodash');
 //[longitude, latitude]
 
 const maxDist = 10000;
@@ -26,10 +27,7 @@ function getNetwork(socket) {
             blocked: { $ne: socket.userId },
             discoverable: true
         },{ 
-            token: 0,  
-            password: 0,
-            chatrooms: 0,
-            contacts: 0
+            token: 0, password: 0, chatrooms: 0, contacts: 0, blocked: 0
         }).then(users => {                 
             socket.emit('/self/getNetwork/success', users);
         }).catch(err => {
@@ -48,33 +46,42 @@ function updateLocation(socket, io) {
                 }
             },
             {new: true, runValidators: true}            
-        ).then(res => {                                    
+        ).then(res => {        
+            res = _.omit(res, ['loc','contacts', 'blocked', 'token', 'password', 'chatrooms']);
+            console.log('wtf', res.contacts);
+            console.log('wtf?', res);
             findUsersNearAndNotify(res);
         }).catch(err => {
             socket.emit('/self/updateLocation/fail', err);
         });
     });
 
-    function findUsersNearAndNotify(res) {        
+    function findUsersNearAndNotify(updatedUser) {        
         User.find({
             loc : {
                 $near : {
-                    $geometry : res.loc,
+                    $geometry : { type: "Point", coordinates: updatedUser.loc },
                     $maxDistance : maxDistForBroadcast
                 }
             },
-            _id: {$ne:socket.userId, $nin: res.blocked},            
+            _id: {$ne:socket.userId, $nin: updatedUser.blocked},            
             blocked: { $ne: socket.userId }            
-        },{ loc: 1 }).then(users => {            
+        },{ _id: 1 }).then(users => {            
             if (!users || users.length === 0) {
                 return;
-            }                        
-            users.forEach(user => {                
-                const userLocation = {_id: socket.userId, loc: res.loc.coordinates};
-                io.to(`${user._id}`).emit('/user/updateLocation', userLocation);                
-            });            
+            }                
+            // res = _.omit(res, 'contacts');
+            // console.log(res);
+            users.forEach(user => {                                              
+                console.log(updatedUser);
+                io.to(`${user._id}`).emit('/user/updateLocation', updatedUser);                
+            });                  
+            // users.forEach(user => {                
+            //     const userLocation = {_id: socket.userId, loc: res.loc.coordinates};
+            //     io.to(`${user._id}`).emit('/user/updateLocation', userLocation);                
+            // });            
         }).then(() => {
-            socket.emit('/self/updateLocation/success', res.loc.coordinates);
+            socket.emit('/self/updateLocation/success', updatedUser.loc.coordinates);
         });
     }
 }

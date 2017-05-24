@@ -18,220 +18,223 @@
 
 ## /login (post)
 
-parameter: Json
-email: String
-password: String
+> parameter: Json </br>
+>> email: String </br>
+>> password: String </br>
 
-return: Json
-token: String
-	res.headers[‘x-auth’]
-body: Json
-	res.body
+> return: Json </br>
+>> token: String </br>
+>> res.headers[‘x-auth’] </br>
+>> body: Json </br>
+>> res.body </br>
 
 # CONNECT TO SOCKET
 
 ## connecting to socket
 
-parameters: String
-query string: String
-	‘token=usertoken&userId=userid’
+> parameters: String </br>
+>> query string: String </br>
+>> ‘token=usertoken&userId=userid’
 
+```
 function:
 const socket = io.connect(url, {
 	'query': 'token=' + res.headers[‘x-auth'] + ‘&userId=’ + res.body._id
 });
+```
 
 ## check if connected
-
+```
 socket.on('connect', () => { //DO SOMETHING });
+```
 
 # UPDATE USER
 
 ## /self/update (emit)
-description: update self information
+> description: update self information
 
-parameter: Json
-	refer to user schema in ‘models’
+> parameter: Json
+>> refer to user schema in ‘models’
 
 ## /self/update/success (on)
-description: check success of updating self information
+> description: check success of updating self information
 
-return: Json
-	updated version of user
+> return: Json
+>> updated version of user
 
 ## /self/update/fail (on)
-description: check failure of updating self information
+> description: check failure of updating self information
 
-return: String
-	error message
+> return: String
+>> error message
 
 ## /user/update (on)
-description: check update of other user’s information
+> description: check update of other user’s information
 
-return: Json
-	updated values of the user, with user _id
+> return: Json
+>> updated values of the user, with user _id
 
 #GET USER BY TOKEN
 
 ## /self/getByToken (emit)
-description: get self information by token
+> description: get self information by token
 
-parameter: Nothing
+> parameter: Nothing
 
 ## /self/getByToken/success (on)
-description: check success of getting self information by token
+> description: check success of getting self information by token
 
-return: Json
-	everything excluding token, chatrooms, contacts, password, and blocked
+> return: Json
+>> everything excluding token, chatrooms, contacts, password, and blocked
 
 ## /self/getByToken/fail (on)
-description: check failure of getting self information by token
+> description: check failure of getting self information by token
 
-return: String
-	error message
+> return: String
+>> error message
 
 # GET USER BY ID
 
 ## /user/getById (emit)
-description: get user information by id
+> description: get user information by id
 
-parameter: String
-	_id of user to get
+> parameter: String
+>> _id of user to get
 
 ## /user/getById/success (on)
-description: check success of getting user information by id
+> description: check success of getting user information by id
 
-return: Json
-	everything excluding token, chatrooms, contacts, password, and blocked
+> return: Json
+>> everything excluding token, chatrooms, contacts, password, and blocked
 
 ## /user/getById/fail (on)
-description: check failure of getting user information by id
+> description: check failure of getting user information by id
 
-return: String
-	error message
+> return: String
+>> error message
 
 # NETWORK
 
 ## /self/getNetwork (emit)
-description: get users 10km around self
+> description: get users 10km around self
 
-parameter: Array of floats
-	[longitude, latitude]
+> parameter: Array of floats
+>> [longitude, latitude]
 
 ## /self/getNetwork/success (on)
-description: check success of getting users 10km around self
+> description: check success of getting users 10km around self
 
-return: Array of objects
-	array of users excluding token, chatrooms, contacts, password, and blocked
+> return: Array of objects
+>> array of users excluding token, chatrooms, contacts, password, and blocked
 
 ## /self/getNetwork/fail (on)
-description: check failure of getting users 10km around self
+> description: check failure of getting users 10km around self
 
-return: String
-	error message
+> return: String
+>> error message
 
 ## /self/updateLocation (emit)
-description: update location of self
+> description: update location of self
 
-parameter: Array of floats
-	[longitude, latitude]
+> parameter: Array of floats
+>> [longitude, latitude]
 
 ## /self/updateLocation/success (on)
-description: check success of updating location of self
+> description: check success of updating location of self
 
-return: Array of floats
-	New location of the user
-	[longitude, latitude]
+> return: Array of floats
+>> New location of the user </br>
+>> [longitude, latitude]
 
 ## /self/updateLocation/fail (on)
-description: check failure of updating location of self
+> description: check failure of updating location of self
 
 ## /user/updateLocation (on)
-description: check other user’s update of location when the other user gets inside 10km range
+> description: check other user’s update of location when the other user gets inside 10km range
 
-return: Json
-	user except token, chatrooms, contacts, password, and blocked
+> return: Json
+>> user except token, chatrooms, contacts, password, and blocked
 
 # SETTINGS
 
 ## /self/blockUser (emit)
-description: block user
+> description: block user
 
-parameter: String
-	_id of the user to block
+> parameter: String
+>> _id of the user to block
 
 ## /self/blockUser/success (on)
 
-return: none
+> return: none
 
 ## /self/blockUser/fail (on)
 
-return: String
-	error message
+> return: String
+>> error message
 
 ## /user/blocked (on)
 
-return: String
-	_id of the user who blocked self
+> return: String
+>> _id of the user who blocked self
 
 ## /self/unblockUser (emit)
-description: unblock user
+> description: unblock user
 
-parameter: String
-	_id of the user to unblock
+> parameter: String
+>> _id of the user to unblock
 
 ## /self/unblockUser/success (on)
 
-return: none
+> return: none
 
 ## /self/unblockUser/fail (on)
 
-return: String
-	error message
+> return: String
+>> error message
 
 ## /user/unblocked (on)
 
-return: String
-	_id of the user who unblocked self
+> return: String
+>> _id of the user who unblocked self
 
 ## /self/changeDiscoverable (emit)
-description: changing discoverable status of self
+> description: changing discoverable status of self
 
-parameter: Boolean
-	true or false depending on whether user switches discoverable setting on/off
+> parameter: Boolean
+>> true or false depending on whether user switches discoverable setting on/off
 
 ## /self/changeDiscoverable/success (on)
 
-return: Boolean
-	value of the user’s discoverable
+> return: Boolean
+>> value of the user’s discoverable
 
 ## /self/changeDiscoverable/fail (on)
 
-return: String
-	error message
+> return: String
+>> error message
 
 ## /user/changedDiscoverable/ (on)
 
-return: Object
-	{_id: id of user who changed discoverable setting, discoverable: true or false}
+> return: Object
+>> {_id: id of user who changed discoverable setting, discoverable: true or false}
 
 ## /self/logout (emit)
 
-parameter: none
+> parameter: none
 
 ## /self/logout/success (on)
 
-return: none
+> return: none
 
 ## /self/logout/fail (on)
 
-return: String
-	error message
+> return: String
+>> error message
 
 ## /user/loggedOut (on)
 
-return: String
-	_id of the user who logged out
+> return: String
+>> _id of the user who logged out
 
 # CONTACTS
 
@@ -258,6 +261,10 @@ return: String
 
 ## /self/deleteChat/fail (on)
 
+# CRITICAL ERROR
+
+## /criticalError
+> description: something horribly went wrong. Should log out the user and restart.
 
 
 

@@ -3,16 +3,16 @@
 ## /signup (post)
 
 > parameter: Json </br>
-age: Number </br>
-name: String </br>
-email: String </br>
-password: String </br>
+>> age: Number </br>
+>> name: String </br>
+>> email: String </br>
+>> password: String </br>
 
 > return: Json </br>
-token: String </br>
-res.headers[‘x-auth’] </br>
-body: Json </br>
-res.body </br>
+>> token: String </br>
+>> res.headers[‘x-auth’] </br>
+>> body: Json </br>
+>> res.body </br>
 
 # LOG IN
 

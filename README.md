@@ -6,13 +6,13 @@ parameter: Json </br>
 age: Number </br>
 name: String </br>
 email: String </br>
-password: String </br> </br>
+password: String </br>
 
 return: Json </br>
 token: String </br>
-	+ res.headers[‘x-auth’] </br>
+* res.headers[‘x-auth’] </br>
 body: Json </br>
-	+ res.body </br>
+* res.body </br>
 
 # LOG IN
 

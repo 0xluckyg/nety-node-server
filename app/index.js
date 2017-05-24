@@ -51,9 +51,9 @@ io.on('connection', socket => {
     deleteContact(socket);
 
     // //CHAT
-    // getChatrooms(socket);    
-    // sendMessage(socket);
-    // deleteChat(socket);
+    getChatrooms(socket);    
+    sendMessage(socket);
+    deleteChat(socket);
 
     // //SETTINGS    
     blockUser(socket);

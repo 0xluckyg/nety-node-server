@@ -8,7 +8,7 @@ const {ObjectID} = require('mongodb');
 
 const {authenticateToken} = require('./middleware/authenticate');
 const {signup, login} = require('./server/authentication');
-const {getChatrooms, sendMessage, deleteChat} = require('./server/chat');
+const {getChatrooms, getMessages, sendMessage, deleteChat} = require('./server/chat');
 const {getContacts, deleteContact} = require('./server/contact');
 const {getNetwork, updateLocation} = require('./server/network');
 const {logoutUser, blockUser, unblockUser, changeDiscoverableSetting} = require('./server/settings');
@@ -40,25 +40,26 @@ io.on('connection', socket => {
     //USER
     getUserByToken(socket);
     getUserById(socket);
-    updateUser(socket);
+    updateUser(socket); //REQUIRED: offline sync //TODO: send update to all users
 
     // //NETWORK
     getNetwork(socket);
     updateLocation(socket, io);
 
     // //CONTACTS
-    getContacts(socket);
+    getContacts(socket); //REQUIRED: offline sync, pagination, sort
     deleteContact(socket);
 
     // //CHAT
-    getChatrooms(socket);    
+    getChatrooms(socket); //REQUIRED: offline sync, pagination, sort
+    getMessages(socket); //REQUIRED: offline sync, pagination, sort
     sendMessage(socket);
-    deleteChat(socket);
+    deleteChat(socket);    
 
     // //SETTINGS    
-    blockUser(socket);
-    unblockUser(socket);
-    logoutUser(socket, io);
+    blockUser(socket); //REQUIRED: offline sync
+    unblockUser(socket); //REQUIRED: offline sync
+    logoutUser(socket, io); 
     changeDiscoverableSetting(socket, io);
 
     //DISCONNECT

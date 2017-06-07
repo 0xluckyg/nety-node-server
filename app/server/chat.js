@@ -24,6 +24,10 @@ function getChatrooms(socket) {
     });
 }
 
+function getMessages(socket) {
+
+}
+
 //TODO: Add to contacts if both messages are exchanged
 function sendMessage(socket) {
     function updateChatroom(msg, callback) {
@@ -113,5 +117,6 @@ function deleteChat(socket) {
 module.exports = {
     getChatrooms,
     sendMessage,
-    deleteChat
+    deleteChat,
+    getMessages
 };

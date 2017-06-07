@@ -18,6 +18,10 @@ function sendMessageTest() {
     });
 }
 
+function getMessagesTest() {
+
+}
+
 function deleteChatTest() {
     describe('delete chat', () => {
         it ('should delete chat and notify self', (done) => {
@@ -44,6 +48,7 @@ function getChatroomsTest() {
 
 module.exports = {
     sendMessageTest,
+    getMessagesTest,
     deleteChatTest,
-    getChatroomsTest
+    getChatroomsTest    
 };

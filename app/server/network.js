@@ -47,20 +47,19 @@ function updateLocation(socket, io) {
             },
             {new: true, runValidators: true}            
         ).then(res => {        
-            res = _.omit(res, ['loc','contacts', 'blocked', 'token', 'password', 'chatrooms']);
-            console.log('wtf', res.contacts);
-            console.log('wtf?', res);
+            // res = _.omit(res, ['loc','contacts', 'blocked', 'token', 'password', 'chatrooms']);            
+            // console.log(res);            
             findUsersNearAndNotify(res);
         }).catch(err => {
             socket.emit('/self/updateLocation/fail', err);
         });
     });
 
-    function findUsersNearAndNotify(updatedUser) {        
+    function findUsersNearAndNotify(updatedUser) {                
         User.find({
             loc : {
                 $near : {
-                    $geometry : { type: "Point", coordinates: updatedUser.loc },
+                    $geometry : updatedUser.loc,
                     $maxDistance : maxDistForBroadcast
                 }
             },
@@ -69,11 +68,13 @@ function updateLocation(socket, io) {
         },{ _id: 1 }).then(users => {            
             if (!users || users.length === 0) {
                 return;
-            }                
-            // res = _.omit(res, 'contacts');
-            // console.log(res);
-            users.forEach(user => {                                              
-                console.log(updatedUser);
+            }                            
+
+            updatedUser = updatedUser.toObject();
+            _.omit(updatedUser, ['contacts','token','chatrooms','blocked','password','authType']);
+            updatedUser.loc = updatedUser.loc.coordinates;
+
+            users.forEach(user => {                                                              
                 io.to(`${user._id}`).emit('/user/updateLocation', updatedUser);                
             });                  
             // users.forEach(user => {                
@@ -81,7 +82,7 @@ function updateLocation(socket, io) {
             //     io.to(`${user._id}`).emit('/user/updateLocation', userLocation);                
             // });            
         }).then(() => {
-            socket.emit('/self/updateLocation/success', updatedUser.loc.coordinates);
+            socket.emit('/self/updateLocation/success', updatedUser.loc);
         });
     }
 }

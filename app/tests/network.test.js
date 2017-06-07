@@ -157,9 +157,9 @@ function updateNetworkTest() {
         });
 
         it('should update location correctly', done => {            
-            const update = [-73.98767189999999, 40.7285977];
+            const update = [-73.98767189999999, 40.7285977];            
             client1.emit('/self/updateLocation', update);
-            client1.on('/self/updateLocation/success', loc => {
+            client1.on('/self/updateLocation/success', loc => {                
                 expect(loc[0]).toBe(update[0]);
                 expect(loc[1]).toBe(update[1]);                
                 done();
@@ -174,7 +174,7 @@ function updateNetworkTest() {
                 doneCount++;
                 if (doneCount === 2) { done(); }
             }
-            client3.on('/user/updateLocation', user => {             
+            client3.on('/user/updateLocation', user => {                             
                 expect(user._id + '').toBe(user1._id + '');
                 expect(user.loc[0]).toBe(update[0]);
                 expect(user.loc[1]).toBe(update[1]);                

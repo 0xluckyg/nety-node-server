@@ -1,3 +1,4 @@
+const {ObjectId} = require('mongodb');
 const {User} = require('../models/user');
 const {Chatroom} = require('../models/chatroom');
 const {Message} = require('../models/message');
@@ -30,8 +31,8 @@ function getChatrooms(socket) {
         const unreads = [];
         chatrooms.forEach(chatroom => {       
             //Adding other person's id and unread count. Only works with 2 people     
-            const index = _.findIndex(chatroom.users, {userId: socket.userId});            
-            fromIds.push(chatroom.users[~index].userId);
+            const index = _.findIndex(chatroom.users, {userId: new ObjectId(socket.userId)});            
+            fromIds.push(chatroom.users[~index*-1].userId);
             unreads.push(chatroom.users[index].unread);
         });
 
@@ -112,26 +113,24 @@ function getMessages(socket) {
     });
 }
 
-//TODO: Add to contacts if both messages are exchanged
 function sendMessage(socket, io) {
     socket.on('/self/sendMessage', msg => {
         Chatroom.findOne({_id: msg.chatroomId})
-        .then(chatroom => {
-            if (chatroom) {
+        .then(chatroom => {            
+            if (chatroom) {                
                 chatroom.lastMessage = {
                     sender: socket.userId,
                     text: msg.text
-                };
-                const index = _.findIndex(chatroom.users, {userId: msg.toId});
+                };                
+                const index = _.findIndex(chatroom.users, {userId: new ObjectId(msg.toId)});
                 chatroom.users[index].unread ++;
                 
-                return chatroom.save().then(() => {
-                    return sendMessage(msg);
+                return chatroom.save().then(() => {                    
+                    return saveMessage(msg);
                 });                
             }  
 
-            let newChatroom = new Chatroom();
-            newChatroom = {
+            const newChatroom = new Chatroom({
                 _id: msg.chatroomId,
                 users: [{
                     userId: socket.userId,
@@ -144,8 +143,8 @@ function sendMessage(socket, io) {
                     sender: socket.userId,
                     text: msg.text
                 }
-            };
-            return newChatroom.save().then(() => {
+            });                        
+            return newChatroom.save().then(() => {                
                 return User.update(
                     { _id: socket.userId },
                     { $push: { chatrooms: msg.toId } }
@@ -159,21 +158,20 @@ function sendMessage(socket, io) {
                 });                                
             });
 
-        }).catch(err => {
+        }).catch(err => {                   
             socket.emit('/self/sendMessage/fail', err);
         });
     });    
 
     function saveMessage(msg) {
-        let newMessage = new Message();
-        newMessage = {
+        const newMessage = new Message({
             chatroomId: msg.chatroomId,
             senderId: socket.userId,
             text: msg.text                    
-        };
-        newMessage.save().then(msg => {
-            socket.emit('/user/sendMessage/success');
-            io.to(`${msg.toId}`).emit('/user/message', msg);            
+        });        
+        newMessage.save().then(savedMsg => {
+            socket.emit('/self/sendMessage/success', savedMsg);
+            io.to(`${msg.toId}`).emit('/user/message', savedMsg);
         });
     }
 }

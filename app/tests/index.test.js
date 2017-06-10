@@ -6,33 +6,33 @@ const {getNetworkTest, updateNetworkTest} = require('./network.test');
 const {getContactsTest, deleteContactTest} = require('./contact.test');
 
 //login
-signupTest();
-loginTest();
-socketConnectTest();
+// signupTest();
+// loginTest();
+// socketConnectTest();
 
-//user
-updateTest();
-getUserByTokenTest();
-getUserByIdTest();
+// //user
+// updateTest();
+// getUserByTokenTest();
+// getUserByIdTest();
 
-//settings
-logoutTest();
-blockTest();
-unblockTest();
-discoverySettingTest();
+// //settings
+// logoutTest();
+// blockTest();
+// unblockTest();
+// discoverySettingTest();
 
-//network
-getNetworkTest(); //TODO: pagination, sort
-updateNetworkTest();
+// //network
+// getNetworkTest(); //TODO: pagination, sort
+// updateNetworkTest();
 
-//contact
-getContactsTest(); //TODO: pagination, sort
-deleteContactTest();
+// //contact
+// getContactsTest(); //TODO: pagination, sort
+// deleteContactTest();
 
 //TODO: complete it
 //chat
-// deleteChatTest();
-// sendMessageTest();
+sendMessageTest();
+// getMessagesTest(); //TODO: pagination, sort
 // readMessageTest();
 // getChatroomsTest(); //TODO: pagination, sort
-// getMessagesTest(); //TODO: pagination, sort
+// deleteChatTest();

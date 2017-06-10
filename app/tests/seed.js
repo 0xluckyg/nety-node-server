@@ -120,6 +120,51 @@ const completeUsers = [
     }
 ];
 
+const messages = [
+    {
+        chatroomId: null,
+        senderId: null,
+        toId: null,
+        text: 'Test message 1'
+    },
+    {
+        chatroomId: null,
+        senderId: null,
+        toId: null,
+        text: 'Test message 2'
+    },
+    {
+        chatroomId: null,
+        senderId: null,
+        toId: null,
+        text: 'Test message 3'
+    },
+    {
+        chatroomId: null,
+        senderId: null,
+        toId: null,
+        text: 'Test message 4'
+    },
+    {
+        chatroomId: null,
+        senderId: null,
+        toId: null,
+        text: 'Test message 5'
+    },
+    {
+        chatroomId: null,
+        senderId: null,
+        toId: null,
+        text: 'Test message 6'
+    },
+    {
+        chatroomId: null,
+        senderId: null,
+        toId: null,
+        text: 'Test message 7'
+    },
+]
+
 function signupUserAndGetSocket(user, callback) {    
     request(server)
     .post('/signup')
@@ -135,9 +180,9 @@ function signupUserAndGetSocket(user, callback) {
 
 module.exports = {
     users,
+    messages,
     completeUsers,
     exampleToken,
     url,
-
     signupUserAndGetSocket
 };

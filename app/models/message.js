@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 //Creating a new todo example
-const Message = mongoose.model('Messages', {
+
+const MessageSchema = new mongoose.Schema({
     chatroomId: {
         type: String,
         required: true
@@ -16,11 +17,11 @@ const Message = mongoose.model('Messages', {
         maxlength: [1000, 'Please keep your message shorter than 1000 characters'],
         trim: true,
         required: true
-    },
-    time: {
-        type: Date,
-        required: true
     }
+},{
+    timestamps: true // Saves createdAt and updatedAt as dates
 });
+
+const Message = mongoose.model('Messages', MessageSchema);
 
 module.exports = {Message};

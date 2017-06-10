@@ -9,7 +9,7 @@ const _ = require('lodash');
 function signupTest() {
 
     describe('signup', () => {        
-        beforeEach((done) => {
+        beforeEach((done) => {            
             User.remove({}).then(() => {
                 request(server)
                 .post('/signup')

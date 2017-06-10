@@ -135,7 +135,6 @@ function getUserByTokenTest() {
         it('should return a valid user', (done) => {
             socket.emit('/self/getByToken');
             socket.on('/self/getByToken/success', res => {
-                console.log(res);
                 expect(res._id).toBe(initialUser._id);
                 User.findById(initialUser._id).then(user => {                    
                     expect(user._id + '').toBe(initialUser._id);                    

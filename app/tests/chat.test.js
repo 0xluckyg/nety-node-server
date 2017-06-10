@@ -1,3 +1,6 @@
+const expect = require('expect');
+const {User} = require('../models/user');
+
 function sendMessageTest() {
     describe('send message', () => {
         it ('should save message and notify self', (done) => {
@@ -19,6 +22,10 @@ function sendMessageTest() {
 }
 
 function getMessagesTest() {
+
+}
+
+function readMessageTest() {
 
 }
 
@@ -49,6 +56,7 @@ function getChatroomsTest() {
 module.exports = {
     sendMessageTest,
     getMessagesTest,
+    readMessageTest,
     deleteChatTest,
-    getChatroomsTest    
+    getChatroomsTest
 };

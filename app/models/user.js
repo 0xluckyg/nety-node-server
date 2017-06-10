@@ -135,14 +135,10 @@ const UserSchema = new mongoose.Schema({
         default: true
     },
     blocked: [mongoose.Schema.Types.ObjectId],
-    chatrooms: [{
-        chatroomId: String,
-        unread: {
-            type: Number,
-            default: 0
-        }
-    }],
+    chatrooms: [String],
     contacts: [mongoose.Schema.Types.ObjectId]
+},{
+    timestamps: true // Saves createdAt and updatedAt as dates
 });
 
 UserSchema.index({loc: '2dsphere'});
@@ -235,6 +231,6 @@ UserSchema.pre('save', function(next) {
 });
 
 //Creating a new user example
-const User = mongoose.model('User', UserSchema);
+const User = mongoose.model('Users', UserSchema);
 
 module.exports = {User};

@@ -46,7 +46,7 @@ function changeDiscoverableSetting(socket, io) {
             {$set: {discoverable}},
             {new: true, runValidators: true}               
         ).then(user => {            
-            findUsersNearAndNotify(user);
+            return findUsersNearAndNotify(user);
         }).catch(err => {
             socket.emit('/self/changeDiscoverable/fail', err);
         });
@@ -59,7 +59,7 @@ function changeDiscoverableSetting(socket, io) {
             socket.emit('/self/changeDiscoverable/success', send.discoverable);
             return;
         }
-        User.find({
+        return User.find({
             loc : {
                 $near : {
                     $geometry : user.loc,
@@ -87,7 +87,7 @@ function logoutUser(socket, io) {
             }
 
             user.removeToken(token).then(() => {
-                findUsersNearAndNotify(user.loc.coordinates);
+                return findUsersNearAndNotify(user.loc.coordinates);
             });
         }).catch(err => {
             socket.emit('/self/logout/fail', err);
@@ -99,7 +99,7 @@ function logoutUser(socket, io) {
             socket.emit('/self/logout/success');
             return;
         }        
-        User.find({
+        return User.find({
             loc : {
                 $near : {
                     $geometry : { type: "Point", coordinates: location },

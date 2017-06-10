@@ -73,7 +73,7 @@ function updateLocation(socket, io) {
             updatedUser.loc = updatedUser.loc.coordinates;
 
             users.forEach(user => {                                                              
-                io.to(`${user._id}`).emit('/user/updateLocation', updatedUser);                
+                io.to(`${user._id}`).emit('/user/updateLocation', updatedUser);
             });                                     
         }).then(() => {
             socket.emit('/self/updateLocation/success', updatedUser.loc);

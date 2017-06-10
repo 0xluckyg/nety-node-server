@@ -12,8 +12,7 @@ function signup(app) {
             res.header('x-auth', token).send(user);
         }).catch(err => {
             if (err.errors !== undefined) {
-                const errorMessage = err.errors[Object.keys(err.errors)[0]].message;
-                console.log(errorMessage);
+                const errorMessage = err.errors[Object.keys(err.errors)[0]].message;                
                 res.status(400).send(errorMessage);
             } else {
                 res.status(400).send(JSON.stringify(err));

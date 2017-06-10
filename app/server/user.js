@@ -1,6 +1,5 @@
 const {User} = require('../models/user');
 const {ObjectID} = require('mongodb');
-const _ = require('lodash');
 
 function updateUser(socket) {
     socket.on('/self/update', user => {

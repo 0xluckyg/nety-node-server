@@ -8,7 +8,7 @@ const {ObjectID} = require('mongodb');
 
 const {authenticateToken} = require('./middleware/authenticate');
 const {signup, login} = require('./server/authentication');
-const {getChatrooms, getMessages, sendMessage, deleteChat} = require('./server/chat');
+const {getChatrooms, getMessages, readMessage, sendMessage, deleteChat} = require('./server/chat');
 const {getContacts, deleteContact} = require('./server/contact');
 const {getNetwork, updateLocation} = require('./server/network');
 const {logoutUser, blockUser, unblockUser, changeDiscoverableSetting} = require('./server/settings');
@@ -52,9 +52,10 @@ io.on('connection', socket => {
 
     // //CHAT
     getChatrooms(socket); //REQUIRED: offline sync, pagination, sort
-    getMessages(socket); //REQUIRED: offline sync, pagination, sort
-    sendMessage(socket);
     deleteChat(socket);    
+    getMessages(socket); //REQUIRED: offline sync, pagination, sort
+    sendMessage(socket, io);
+    readMessage(socket);    
 
     // //SETTINGS    
     blockUser(socket); //REQUIRED: offline sync

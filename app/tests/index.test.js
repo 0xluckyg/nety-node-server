@@ -33,6 +33,6 @@ const {getContactsTest, deleteContactTest} = require('./contact.test');
 //chat
 sendMessageTest();
 // getMessagesTest(); //TODO: pagination, sort
-// readMessageTest();
+readMessageTest();
 // getChatroomsTest(); //TODO: pagination, sort
 // deleteChatTest();

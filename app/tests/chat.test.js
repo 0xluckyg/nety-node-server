@@ -95,6 +95,12 @@ function sendMessageTest() {
                         expect(returnChatroom).toExist();
                         expect(returnChatroom.lastMessage.sender + '').toBe(user2._id);
                         expect(returnChatroom.lastMessage.text + '').toBe(messages[1].text);
+                        const index = _.findIndex(returnChatroom.users, {userId: new ObjectId(user1._id)});                                                
+                        expect(index).toNotBe(-1);                          
+                        expect(returnChatroom.users[index].userId + '').toBe(user1._id);
+                        expect(returnChatroom.users[index].unread).toBe(1);
+                        expect(returnChatroom.users[~index*-1].userId + '').toBe(user2._id);
+                        expect(returnChatroom.users[~index*-1].unread).toBe(1);
                         done();
                     });                    
                 });                
@@ -112,21 +118,11 @@ function sendMessageTest() {
         });
 
         it('should not send msg with missing text', (done) => {
-            const msg = messages[0];
+            const msg = {};
             msg.senderId = user1._id;
             msg.toId = user2._id;        
-            msg.chatroomId = createChatroomId(msg.senderId, msg.toId);            
-            msg.text = '';    
-            client1.emit('/self/sendMessage', msg);
-            client1.on('/self/sendMessage/fail', () => {
-                done();
-            });
-        });
-
-        it('should not send msg with missing senderId', (done) => {
-            const msg = messages[0];            
-            msg.toId = user2._id;        
-            msg.chatroomId = createChatroomId(msg.senderId, msg.toId);                           
+            msg.chatroomId = createChatroomId(msg.senderId, msg.toId);                          
+            msg.text = '';
             client1.emit('/self/sendMessage', msg);
             client1.on('/self/sendMessage/fail', () => {
                 done();
@@ -134,9 +130,10 @@ function sendMessageTest() {
         });
 
         it('should not send msg with missing toId', (done) => {
-            const msg = messages[0];            
+            const msg = {};
             msg.senderId = user1._id;  
-            msg.chatroomId = createChatroomId(msg.senderId, msg.toId);                           
+            msg.chatroomId = createChatroomId(user1._id, user2._id);                                                     
+            msg.text = 'hmm';
             client1.emit('/self/sendMessage', msg);
             client1.on('/self/sendMessage/fail', () => {
                 done();
@@ -151,10 +148,81 @@ function getMessagesTest() {
 
 function readMessageTest() {
 
+    describe('read message', () => {
+        let client1; let client2; let user1; let user2;
+        beforeEach(done => {
+            User.remove({}).then(() => {
+                signupUserAndGetSocket(users[0], (socket, user) => {
+                    client1 = socket;
+                    user1 = user;
+                    signupUserAndGetSocket(users[1], (socket, user) => {
+                        client2 = socket;
+                        user2 = user;                        
+                        done();
+                    });                 
+                });
+            });              
+        });
+
+        it('should successfully unread message', done => {
+            const msg = messages[0];
+            msg.senderId = user1._id;
+            msg.toId = user2._id;
+            msg.chatroomId = createChatroomId(msg.senderId, msg.toId); 
+            client1.emit('/self/sendMessage', msg);
+            client1.on('/self/sendMessage/success', () => {                
+                Chatroom.findById(msg.chatroomId).then(returnChatroom => {                    
+                    expect(returnChatroom).toExist();                    
+                    const index = _.findIndex(returnChatroom.users, {userId: new ObjectId(user2._id)});                                                
+                    expect(index).toNotBe(-1);  
+                    expect(returnChatroom.users[index].userId + '').toBe(user2._id);
+                    expect(returnChatroom.users[index].unread).toBe(1);                    
+                    client2.emit('/self/readMessage', msg.chatroomId);
+                    client2.on('/self/readMessage/success', () => {                              
+                        Chatroom.findById(msg.chatroomId).then(returnChatroom2 => {
+                            expect(returnChatroom2).toExist();
+                            const index = _.findIndex(returnChatroom2.users, {userId: new ObjectId(user2._id)});
+                            expect(returnChatroom2.users[index].userId + '').toBe(user2._id);
+                            expect(returnChatroom2.users[index].unread).toBe(0);
+                            done();
+                        });                  
+                    });   
+                });           
+            });  
+        });  
+
+        it('should fail if chatroom doesn not exist', done => {
+            const msg = messages[0];            
+            const chatroomId = createChatroomId(user1._id, user2._id); 
+            client2.emit('/self/readMessage', msg.chatroomId);
+            client2.on('/self/readMessage/fail', () => {                              
+                Chatroom.findById(chatroomId).then(returnChatroom2 => {
+                    expect(returnChatroom2).toNotExist();                    
+                    done();
+                });                  
+            }); 
+        });  
+    });
+
 }
 
 function deleteChatTest() {
     describe('delete chat', () => {
+        let client1; let client2; let user1; let user2;
+        beforeEach(done => {
+            User.remove({}).then(() => {
+                signupUserAndGetSocket(users[0], (socket, user) => {
+                    client1 = socket;
+                    user1 = user;
+                    signupUserAndGetSocket(users[1], (socket, user) => {
+                        client2 = socket;
+                        user2 = user;                        
+                        done();
+                    });                 
+                });
+            });              
+        });
+
         it ('should delete chat and notify self', (done) => {
             
         });

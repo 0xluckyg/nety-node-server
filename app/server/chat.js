@@ -75,8 +75,8 @@ function deleteChat(socket) {
         User.findOneAndUpdate(
             {_id: socket.userId},
             {$pull: {chatrooms: {chatroomId}}}
-        ).then(() => {
-            socket.emit('/self/deleteChat/success', chatroomId);
+        ).then(() => {            
+            socket.emit('/self/deleteChat/success', chatroomId);            
         }).catch(err => {
             socket.emit('/self/deleteChat/fail', err);
         });
@@ -85,10 +85,14 @@ function deleteChat(socket) {
 
 function readMessage(socket) {
     socket.on('/self/readMessage', chatroomId => {
-        Chatroom.update(
+        Chatroom.findOneAndUpdate(
             { _id: chatroomId, "users.userId": socket.userId },
-            { $set: { "users.$.unread" : 0 } }
-        ).then(() => {
+            { $set: { "users.$.unread" : 0 } },
+            { upsert: false }            
+        ).then(returnChatroom => {            
+            if (!returnChatroom) {                
+                throw Error('no chatroom');
+            }
             socket.emit('/self/readMessage/success');
         }).catch(err => {
             socket.emit('/self/readMessage/fail', err);
@@ -114,9 +118,12 @@ function getMessages(socket) {
 }
 
 function sendMessage(socket, io) {
-    socket.on('/self/sendMessage', msg => {
+    socket.on('/self/sendMessage', msg => {          
         Chatroom.findOne({_id: msg.chatroomId})
-        .then(chatroom => {            
+        .then(chatroom => {      
+            if (!msg.toId) {
+                throw Error('no toId');
+            }
             if (chatroom) {                
                 chatroom.lastMessage = {
                     sender: socket.userId,
@@ -144,7 +151,7 @@ function sendMessage(socket, io) {
                     text: msg.text
                 }
             });                        
-            return newChatroom.save().then(() => {                
+            return newChatroom.save().then(() => {                                    
                 return User.update(
                     { _id: socket.userId },
                     { $push: { chatrooms: msg.toId } }
@@ -158,7 +165,7 @@ function sendMessage(socket, io) {
                 });                                
             });
 
-        }).catch(err => {                   
+        }).catch(err => {                
             socket.emit('/self/sendMessage/fail', err);
         });
     });    
@@ -169,6 +176,7 @@ function sendMessage(socket, io) {
             senderId: socket.userId,
             text: msg.text                    
         });        
+
         newMessage.save().then(savedMsg => {
             socket.emit('/self/sendMessage/success', savedMsg);
             io.to(`${msg.toId}`).emit('/user/message', savedMsg);

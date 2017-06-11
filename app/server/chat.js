@@ -6,18 +6,21 @@ const _ = require('lodash');
 
 function getChatrooms(socket) {
     socket.on('/self/getChats', () => {
-        User.find({_id: socket.userId}, {chatrooms: 1}).then(userChatrooms => {
-            if (!userChatrooms) {
-                Promise.reject();
+        User.find(
+            {_id: socket.userId}, 
+            {chatrooms: 1, blocked: 1}
+        ).then(user => {
+            if (!user) {
+                throw Error('no chatrooms');
             }
 
             return Chatroom.find({
-                _id: { $in: userChatrooms }
+                _id: { $in: user.chatrooms }                
             }).sort(
                 {updatedAt: -1}
             ).then(chatrooms => {
                 if (chatrooms) {
-                    return returnChatrooms(chatrooms);
+                    return returnChatrooms(chatrooms, user.blocked);
                 }
             });
 
@@ -26,19 +29,24 @@ function getChatrooms(socket) {
         });
     });
 
-    function returnChatrooms(chatrooms) {
+    function returnChatrooms(chatrooms, blocked) {
         const fromIds = [];        
         const unreads = [];
         chatrooms.forEach(chatroom => {       
-            //Adding other person's id and unread count. Only works with 2 people     
+            //Adding other person's id and unread count. Only works with 2 people
             const index = _.findIndex(chatroom.users, {userId: new ObjectId(socket.userId)});            
-            fromIds.push(chatroom.users[~index*-1].userId);
-            unreads.push(chatroom.users[index].unread);
+            const otherUser = chatroom.users[(index-1)*-1].userId;
+            if (!_.includes(blocked, otherUser)) {
+                fromIds.push(otherUser);
+                unreads.push(chatroom.users[index].unread);   
+            }            
         });
 
-        User.find(
-            {_id: {$in: fromIds}},
-            {profilePicture: 1, name: 1}
+        User.find({
+                _id: {$in: fromIds},
+                blocked: { $ne: socket.userId }   
+            },            
+            { profilePicture: 1, name: 1 }
         ).then(users => {
             if (users.length !== fromIds) {
                 socket.emit('/self/getChats/fail');

@@ -5,57 +5,54 @@ const {Message} = require('../models/message');
 const _ = require('lodash');
 
 function getChatrooms(socket) {
-    socket.on('/self/getChats', () => {
-        User.find(
+    socket.on('/self/getChatrooms', () => {
+        User.findById(
             {_id: socket.userId}, 
             {chatrooms: 1, blocked: 1}
         ).then(user => {
             if (!user) {
                 throw Error('no chatrooms');
-            }
-
+            }            
             return Chatroom.find({
-                _id: { $in: user.chatrooms }                
+                _id: { $in: user.chatrooms },
+                'users.userId': { $nin: user.blocked }
             }).sort(
                 {updatedAt: -1}
             ).then(chatrooms => {
                 if (chatrooms) {
-                    return returnChatrooms(chatrooms, user.blocked);
+                    return returnChatrooms(chatrooms);
                 }
             });
 
         }).catch(err => {
-            socket.emit('/self/getChats/fail', err);
+            socket.emit('/self/getChatrooms/fail', err);
         });
     });
 
-    function returnChatrooms(chatrooms, blocked) {
+    function returnChatrooms(chatrooms) {        
         const fromIds = [];        
         const unreads = [];
-        chatrooms.forEach(chatroom => {       
+        chatrooms.forEach(chatroom => {               
             //Adding other person's id and unread count. Only works with 2 people
             const index = _.findIndex(chatroom.users, {userId: new ObjectId(socket.userId)});            
             const otherUser = chatroom.users[(index-1)*-1].userId;
-            if (!_.includes(blocked, otherUser)) {
-                fromIds.push(otherUser);
-                unreads.push(chatroom.users[index].unread);   
-            }            
-        });
 
-        User.find({
+            fromIds.push(otherUser);
+            unreads.push(chatroom.users[index].unread);
+            
+        });                                
+
+        return User.find({
                 _id: {$in: fromIds},
                 blocked: { $ne: socket.userId }   
             },            
             { profilePicture: 1, name: 1 }
-        ).then(users => {
-            if (users.length !== fromIds) {
-                socket.emit('/self/getChats/fail');
-                return;
-            }
+        ).then(users => {                                
+            //Sort from most recent updated again
+            users.sort(function(user1,user2){
+                return fromIds.indexOf(user1._id.toString()) < fromIds.indexOf(user2._id.toString()) ? -1 : 1;
+            });
 
-            _.sortBy(users, user => { 
-                return fromIds.indexOf(user._id);
-            });                    
             const returnChatrooms = [];      
             for (let i = 0; i < users.length; i++) {                
                 const returnChatroom = {
@@ -71,7 +68,7 @@ function getChatrooms(socket) {
                 returnChatrooms.push(returnChatroom);
 
                 if (i === users.length - 1) {
-                    socket.emit('/self/getChats/success', returnChatrooms);
+                    socket.emit('/self/getChatrooms/success', returnChatrooms);
                 }
             }
         });

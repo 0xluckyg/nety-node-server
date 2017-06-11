@@ -345,8 +345,7 @@ function getChatroomsTest() {
                             user3 = user;
                             signupUserAndGetSocket(users[3], (socket, user) => {                        
                                 user4 = user;
-                                makeChatrooms();
-                                done();
+                                makeChatrooms();                                
                             });                        
                         });
                     });                 
@@ -357,17 +356,17 @@ function getChatroomsTest() {
                 const message1 = {
                     chatroomId: createChatroomId(user1._id, user2._id),                    
                     toId: user2._id,
-                    text: 'Test message 0'
+                    text: 'To user 2'
                 };
                 const message2 = {
                     chatroomId: createChatroomId(user1._id, user3._id),                    
                     toId: user3._id,
-                    text: 'Test message 1'
+                    text: 'To user 3'
                 };
                 const message3 = {
                     chatroomId: createChatroomId(user1._id, user4._id),                    
                     toId: user4._id,
-                    text: 'Test message 2'
+                    text: 'To user 4'
                 };                
                 client1.emit('/self/sendMessage', message1);
                 setTimeout(() => client1.emit('/self/sendMessage', message2), 50);
@@ -381,17 +380,48 @@ function getChatroomsTest() {
             }          
         });
         
-        it ('should return chatrooms', (done) => {
-
+        it('should return chatrooms in chronological order', (done) => {
+            client1.emit('/self/getChatrooms');
+            client1.on('/self/getChatrooms/success', chatrooms => {
+                expect(chatrooms.length).toBe(3);
+                expect(chatrooms[0].lastMessage.text).toBe('To user 4');
+                expect(chatrooms[1].lastMessage.text).toBe('To user 3');
+                expect(chatrooms[2].lastMessage.text).toBe('To user 2');
+                client2.emit('/self/getChatrooms');
+                client2.on('/self/getChatrooms/success', chatrooms2 => {
+                    expect(chatrooms2.length).toBe(1);
+                    expect(chatrooms2[0].lastMessage.text).toBe('To user 2');
+                    expect(chatrooms2[0].unread).toBe(1);                    
+                    done();
+                });                
+            });
         });
 
-        it ('should not return blocked user', (done) => {
-
+        it('should not return blocked user', (done) => {
+            client1.emit('/self/blockUser', user3._id);
+            client1.on('/self/blockUser/success', () => {
+                client1.emit('/self/getChatrooms');
+                client1.on('/self/getChatrooms/success', chatrooms => {                    
+                    expect(chatrooms.length).toBe(2);
+                    expect(chatrooms[0].lastMessage.text).toBe('To user 4');                    
+                    expect(chatrooms[1].lastMessage.text).toBe('To user 2');
+                    done();
+                });
+            });
         });
 
-        it ('should not return user who blocked self', (done) => {
-
-        })
+        it('should not return user who blocked self', (done) => {
+            client2.emit('/self/blockUser', user1._id);
+            client2.on('/self/blockUser/success', () => {                
+                client1.emit('/self/getChatrooms');
+                client1.on('/self/getChatrooms/success', chatrooms => {
+                    expect(chatrooms.length).toBe(2);
+                    expect(chatrooms[0].lastMessage.text).toBe('To user 4');                    
+                    expect(chatrooms[1].lastMessage.text).toBe('To user 3');
+                    done();
+                });
+            });
+        });
     });
 }
 

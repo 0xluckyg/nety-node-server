@@ -22,6 +22,11 @@ const MessageSchema = new mongoose.Schema({
     timestamps: true // Saves createdAt and updatedAt as dates
 });
 
+MessageSchema.index({
+    chatroomId: 1,
+    text: 1
+});
+
 const Message = mongoose.model('Messages', MessageSchema);
 
 module.exports = {Message};

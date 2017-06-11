@@ -14,7 +14,7 @@ function getChatrooms(socket) {
             return Chatroom.find({
                 _id: { $in: userChatrooms }
             }).sort(
-                {updatedAt: 1}
+                {updatedAt: -1}
             ).then(chatrooms => {
                 if (chatrooms) {
                     return returnChatrooms(chatrooms);
@@ -101,17 +101,18 @@ function readMessage(socket) {
 }
 
 function getMessages(socket) {
+    //getM: { start: startFromIndex, chatroomId: idOfChatroom }
     socket.on('/self/getMessages', getM => {
-        Message.find({_id: getM._id})
+        Message.find({chatroomId: getM.chatroomId})
         .sort(
-            {time: 1}
+            {createdAt: -1}
         ).skip(getM.start)
         .limit(50)
-        .then(messages => {
+        .then(messages => {            
             if (messages) {                
                 socket.emit('/self/getMessages/success', messages);
             }
-        }).catch(err => {
+        }).catch(err => {            
             socket.emit('/self/getMessages/fail', err);
         });
     });

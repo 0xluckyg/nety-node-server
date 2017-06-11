@@ -32,7 +32,7 @@ const {getContactsTest, deleteContactTest} = require('./contact.test');
 //TODO: complete it
 //chat
 // sendMessageTest();
-// getMessagesTest(); //TODO: pagination, sort
+getMessagesTest(); //TODO: pagination, sort
 // readMessageTest();
 // getChatroomsTest(); //TODO: pagination, sort
-deleteChatTest();
+// deleteChatTest();

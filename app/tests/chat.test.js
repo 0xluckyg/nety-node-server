@@ -143,7 +143,88 @@ function sendMessageTest() {
 }
 
 function getMessagesTest() {
+    describe('get messages', () => {
+        let client1; let client2; let user1; let user2;
+        beforeEach(done => {
+            User.remove({}).then(() => {
+                signupUserAndGetSocket(users[0], (socket, user) => {
+                    client1 = socket;
+                    user1 = user;
+                    signupUserAndGetSocket(users[1], (socket, user) => {
+                        client2 = socket;
+                        user2 = user;                            
+                        initiateMessage();                    
+                    });                 
+                });
+            });    
 
+            function initiateMessage() {
+                Message.remove({}).then(() => {
+                    const chatroomId = createChatroomId(user1._id, user2._id);
+                    const message = {
+                        chatroomId,
+                        senderId: user1._id,
+                        toId: user2._id,
+                        text: 'Test message 0'
+                    };
+                    client1.emit('/self/sendMessage', message);
+                    client1.on('/self/sendMessage/success', () => {                    
+                        setTimeout(() => { createMessages(1, 40, false); }, 50);                        
+                        setTimeout(() => { createMessages(41, 80, false); }, 100);
+                        setTimeout(() => { createMessages(81, 120, false);}, 150);                    
+                        setTimeout(() => { createMessages(121, 122, true);}, 200);                                                     
+                    });  
+                });
+            }
+
+            function createMessages(start, end, doneFlag) {
+                const messages = [];
+                const chatroomId = createChatroomId(user1._id, user2._id);
+                for (let i = start; i <= end; i++) {
+                    const message = {};
+                    message.chatroomId = chatroomId;
+                    if (i % 2 === 0) {
+                        message.senderId = user1._id;
+                    } else {
+                        message.senderId = user2._id;
+                    }
+                    message.text = `Test message ${i}`;
+                    messages.push(message);
+                }                
+                Message.insertMany(messages).then(() => {
+                    if (doneFlag) {
+                        done();
+                    }                        
+                });                             
+            }                  
+        });    
+
+        it('should successfully get messages and limit 50', done => {
+            const chatroomId = createChatroomId(user1._id, user2._id);
+            client1.emit('/self/getMessages', {
+                start: 0,
+                chatroomId
+            });
+            client1.on('/self/getMessages/success', messages => {
+                expect(messages[0].text).toBe('Test message 121');
+                expect(messages.length).toBe(50);                
+                done();
+            });
+        });
+
+        it('should successfully get messages and sort by date created', done => {
+            const chatroomId = createChatroomId(user1._id, user2._id);
+            client1.emit('/self/getMessages', {
+                start: 101,
+                chatroomId
+            });
+            client1.on('/self/getMessages/success', messages => {
+                expect(messages.length).toBe(22);                
+                expect(messages[21].text).toBe('Test message 0');                
+                done();
+            });
+        });
+    });
 }
 
 function readMessageTest() {

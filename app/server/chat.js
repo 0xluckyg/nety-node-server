@@ -154,11 +154,11 @@ function sendMessage(socket, io) {
             return newChatroom.save().then(() => {                                    
                 return User.update(
                     { _id: socket.userId },
-                    { $push: { chatrooms: msg.toId } }
+                    { $push: { chatrooms: msg.chatroomId } }
                 ).then(() => {
                     return User.update(
                         { _id: msg.toId },
-                        { $push: { chatrooms: socket.userId } }
+                        { $push: { chatrooms: msg.chatroomId } }
                     ).then(() => {
                         return saveMessage(msg);
                     });

@@ -223,8 +223,33 @@ function deleteChatTest() {
             });              
         });
 
-        it ('should delete chat and notify self', (done) => {
-            
+        it('should delete chat and notify self', (done) => {
+            const msg = messages[0];
+            msg.senderId = user1._id;
+            msg.toId = user2._id;
+            msg.chatroomId = createChatroomId(msg.senderId, msg.toId); 
+            client1.emit('/self/sendMessage', msg);
+            client1.on('/self/sendMessage/success', () => {                
+                User.findById(user2._id).then(returnUser => {
+                    expect(returnUser.chatrooms).toContain(msg.chatroomId);                    
+                    deleteChat();
+                    done();
+                });                   
+            }); 
+
+            function deleteChat() {
+                client2.emit('/self/deleteChat', msg.chatroomId);
+                client2.on('/self/deleteChat.success', returnChatroomId => {
+                    expect(returnChatroomId).toExist();
+                    User.findById(user2._id).then(returnUser2 => {
+                        expect(returnUser2.chatrooms).toNotContain(returnChatroomId);   
+                        User.findById(user1._id).then(returnUser3 => {
+                            expect(returnUser3.chatrooms).toContain(returnChatroomId);
+                            done();
+                        });                            
+                    });
+                });
+            }
         });
     });
 }

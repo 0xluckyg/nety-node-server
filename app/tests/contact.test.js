@@ -115,7 +115,7 @@ function getContactsTest() {
 
 function deleteContactTest() {
     describe('delete contact', () => {
-        let client1; let user1; let client2; let user2; let user3;
+        let client1; let user1; let user2;
         const clientIds = [];
 
         beforeEach(done => {      
@@ -127,11 +127,9 @@ function deleteContactTest() {
                     user1 = user;
                     signupUserAndGetSocket(users[1], (socket, user) => {
                         clientIds.push(user._id);
-                        user2 = user; 
-                        client2 = socket;
+                        user2 = user;                         
                         signupUserAndGetSocket(users[2], (socket, user) => {
-                            clientIds.push(user._id);
-                            user3 = user;
+                            clientIds.push(user._id);                            
                             done();
                         });
                     });                 
@@ -176,41 +174,57 @@ function addContactTest() {
                     user1 = user;
                     signupUserAndGetSocket(users[1], (socket, user) => {
                         client2 = socket;
-                        user2 = user;                                                
+                        user2 = user;     
+                        done();                                           
                     });                 
                 });
             });              
         }); 
 
-        it('should add to contact if number of messages is greater than 2', (done) => {
+        it('should add to contact if number of messages is greater than 2', (done) => {            
             createMessages(0,2,() => {
-
+                client1.emit('/self/addContact', user2._id);
+                client1.on('/self/addContact/success', addedUser => {
+                    User.findOne({_id: user1._id}, {contacts: 1}).then(user => {                        
+                        expect(user.contacts.length).toBe(1);
+                        expect(user.contacts[0] + '').toBe(addedUser + '');
+                        done();
+                    });
+                });
             });
         });     
 
         it('should not add to contact if number of messages is less than 2', (done) => {
             createMessages(0,0,() => {
-                
+                client1.emit('/self/addContact', user2._id);
+                client1.on('/self/addContact/fail', () => {
+                    User.findOne({_id: user1._id}, {contacts: 1}).then(user => {
+                        expect(user.contacts.length).toBe(0);
+                        done();
+                    });
+                });
             });
         });        
 
         function createMessages(start, end, callback) {
-            const messages = [];
-            const chatroomId = createChatroomId(user1._id, user2._id);
-            for (let i = start; i <= end; i++) {
-                const message = {};
-                message.chatroomId = chatroomId;
-                if (i % 2 === 0) {
-                    message.senderId = user1._id;
-                } else {
-                    message.senderId = user2._id;
-                }
-                message.text = `Test message ${i}`;
-                messages.push(message);
-            }                
-            Message.insertMany(messages).then(() => {
-                callback();   
-            });                             
+            Message.remove({}).then(() => {
+                const messages = [];
+                const chatroomId = createChatroomId(user1._id, user2._id);
+                for (let i = start; i <= end; i++) {
+                    const message = {};
+                    message.chatroomId = chatroomId;
+                    if (i % 2 === 0) {
+                        message.senderId = user1._id;
+                    } else {
+                        message.senderId = user2._id;
+                    }
+                    message.text = `Test message ${i}`;
+                    messages.push(message);
+                }                
+                Message.insertMany(messages).then(() => {
+                    callback();   
+                });  
+            });                           
         }  
     });
 }

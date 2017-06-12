@@ -9,7 +9,7 @@ const {ObjectID} = require('mongodb');
 const {authenticateToken} = require('./middleware/authenticate');
 const {signup, login} = require('./server/authentication');
 const {getChatrooms, getMessages, readMessage, sendMessage, deleteChat} = require('./server/chat');
-const {getContacts, deleteContact} = require('./server/contact');
+const {getContacts, deleteContact, addContact} = require('./server/contact');
 const {getNetwork, updateLocation} = require('./server/network');
 const {logoutUser, blockUser, unblockUser, changeDiscoverableSetting} = require('./server/settings');
 const {getUserById, getUserByToken, updateUser} = require('./server/user');
@@ -49,6 +49,7 @@ io.on('connection', socket => {
     // //CONTACTS
     getContacts(socket); //REQUIRED: offline sync, pagination, sort
     deleteContact(socket);
+    addContact(socket);
 
     // //CHAT
     getChatrooms(socket); //REQUIRED: offline sync, pagination, sort

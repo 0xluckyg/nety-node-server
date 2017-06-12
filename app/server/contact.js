@@ -42,8 +42,8 @@ function deleteContact(socket) {
 
 function addContact(socket) {
     socket.on('/self/addContact', userToAddId => {
-        const chatroomId = createChatroomId(socket.userId, userToAddId);
-        Message.count({chatroomId}).then(count => {
+        const chatroomId = createChatroomId(socket.userId + '', userToAddId);                
+        Message.count({chatroomId}).then(count => {            
             if (count >= 2) {
                 return User.update(
                     { _id: socket.userId },
@@ -59,7 +59,7 @@ function addContact(socket) {
         });
     });
 
-    function createChatroomId(id1, id2) {    
+    function createChatroomId(id1, id2) { 
         const compare = id1.localeCompare(id2);    
         if (compare === -1) {
             return id1 + id2;

@@ -3,7 +3,7 @@ const {updateTest, getUserByIdTest, getUserByTokenTest} = require('./user.test')
 const {deleteChatTest, getMessagesTest, readMessageTest, sendMessageTest, getChatroomsTest} = require('./chat.test');
 const {logoutTest, blockTest, unblockTest, discoverySettingTest} = require('./settings.test');
 const {getNetworkTest, updateNetworkTest} = require('./network.test');
-const {getContactsTest, deleteContactTest} = require('./contact.test');
+const {getContactsTest, deleteContactTest, addContactTest} = require('./contact.test');
 
 // login
 signupTest();
@@ -25,9 +25,10 @@ discoverySettingTest();
 getNetworkTest(); //TODO: pagination, sort
 updateNetworkTest();
 
-//contact
+// contact
 getContactsTest(); //TODO: pagination, sort
 deleteContactTest();
+addContactTest();
 
 //chat
 sendMessageTest();

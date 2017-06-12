@@ -165,15 +165,14 @@ function deleteContactTest() {
 
 function addContactTest() {
     describe('add contact', () => {
-        let client1; let client2; let user1; let user2;
+        let client1; let user1; let user2;
 
         beforeEach(done => {
             User.remove({}).then(() => {
                 signupUserAndGetSocket(users[0], (socket, user) => {
                     client1 = socket;
                     user1 = user;
-                    signupUserAndGetSocket(users[1], (socket, user) => {
-                        client2 = socket;
+                    signupUserAndGetSocket(users[1], (socket, user) => {                        
                         user2 = user;     
                         done();                                           
                     });                 

@@ -181,7 +181,7 @@ function sendMessage(socket, io) {
             chatroomId: msg.chatroomId,
             senderId: socket.userId,
             text: msg.text                    
-        });        
+        });
 
         newMessage.save().then(savedMsg => {
             socket.emit('/self/sendMessage/success', savedMsg);

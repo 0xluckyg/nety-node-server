@@ -3,17 +3,8 @@ const {ObjectId} = require('mongodb');
 const {User} = require('../models/user');
 const {Message} = require('../models/message');
 const {Chatroom} = require('../models/chatroom');
-const {users, signupUserAndGetSocket, messages} = require('./seed');
+const {users, signupUserAndGetSocket, messages, createChatroomId} = require('./seed');
 const _ = require('lodash');
-
-function createChatroomId(id1, id2) {    
-    const compare = id1.localeCompare(id2);    
-    if (compare === -1) {
-        return id1 + id2;
-    } else {
-        return id2 + id1;
-    }    
-}
 
 function sendMessageTest() {
 

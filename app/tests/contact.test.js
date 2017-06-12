@@ -1,7 +1,8 @@
 const expect = require('expect');
 const {ObjectId} = require('mongodb');
 const {User} = require('../models/user');
-const {users, signupUserAndGetSocket} = require('./seed');
+const {Message} = require('../models/message');
+const {users, signupUserAndGetSocket, createChatroomId} = require('./seed');
 
 function getContactsTest() {
     describe('get contacts', () => {
@@ -164,7 +165,58 @@ function deleteContactTest() {
     });
 }
 
+function addContactTest() {
+    describe('add contact', () => {
+        let client1; let client2; let user1; let user2;
+
+        beforeEach(done => {
+            User.remove({}).then(() => {
+                signupUserAndGetSocket(users[0], (socket, user) => {
+                    client1 = socket;
+                    user1 = user;
+                    signupUserAndGetSocket(users[1], (socket, user) => {
+                        client2 = socket;
+                        user2 = user;                                                
+                    });                 
+                });
+            });              
+        }); 
+
+        it('should add to contact if number of messages is greater than 2', (done) => {
+            createMessages(0,2,() => {
+
+            });
+        });     
+
+        it('should not add to contact if number of messages is less than 2', (done) => {
+            createMessages(0,0,() => {
+                
+            });
+        });        
+
+        function createMessages(start, end, callback) {
+            const messages = [];
+            const chatroomId = createChatroomId(user1._id, user2._id);
+            for (let i = start; i <= end; i++) {
+                const message = {};
+                message.chatroomId = chatroomId;
+                if (i % 2 === 0) {
+                    message.senderId = user1._id;
+                } else {
+                    message.senderId = user2._id;
+                }
+                message.text = `Test message ${i}`;
+                messages.push(message);
+            }                
+            Message.insertMany(messages).then(() => {
+                callback();   
+            });                             
+        }  
+    });
+}
+
 module.exports = {
     getContactsTest,
-    deleteContactTest
+    deleteContactTest,
+    addContactTest
 };

@@ -163,7 +163,16 @@ const messages = [
         toId: null,
         text: 'Test message 7'
     },
-]
+];
+
+function createChatroomId(id1, id2) {    
+    const compare = id1.localeCompare(id2);    
+    if (compare === -1) {
+        return id1 + id2;
+    } else {
+        return id2 + id1;
+    }    
+}
 
 function signupUserAndGetSocket(user, callback) {    
     request(server)
@@ -184,5 +193,6 @@ module.exports = {
     completeUsers,
     exampleToken,
     url,
-    signupUserAndGetSocket
+    signupUserAndGetSocket,
+    createChatroomId
 };

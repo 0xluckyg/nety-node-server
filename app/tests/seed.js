@@ -3,6 +3,13 @@ const {server} = require('../index');
 const exampleToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTFhMTlmNDNiNWIyNjI2YTViMTEyMTQiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNDk0ODgyODA1fQ.Zz4XZw0qslzNcW2oQhIYWJCkyODi_Rm5wef-qExi8n4'
 const url = 'http://localhost:3000';
 const io = require('socket.io-client');
+const {User} = require('../models/user');
+
+const saintMarks = [-73.98767179999999,40.7285977];
+//Columbia University. 9km away from client 1
+const columbia = [-73.96257270000001, 40.8075355];
+//Brooklyn Museum. 15.1km away from client2. 6.6km away from client1
+const brooklynMuseum = [-73.963631, 40.671206];
 
 const users = [
     {
@@ -153,6 +160,64 @@ const messages = [
     },
 ];
 
+function clearUsers() {    
+    User.remove({}).then(() => {
+        console.log('removed users');
+    });
+}
+
+function populateUsers() {
+    const users = [];    
+    for (let i = 0; i < 30; i ++) {
+        let lonlat = [];
+        if (i <= 10) {
+            lonlat = saintMarks;
+        } else if (i > 10 && i <= 20) {
+            lonlat = brooklynMuseum;
+        } else {
+            lonlat = columbia;
+        }
+
+        const user = {        
+            name: {first: `first${i}`, last: `last${i}`},
+            email: `TestUser${i}@email.com`,
+            password: 'somepw123',
+            status: `test user ${i} status`,
+            summary: `test user ${i} summary`,
+            profession: `test user ${i} profession`,
+            work: `test user ${i} work`,
+            skills: [`test user ${i} skills`],
+            experiences: [
+                {
+                    name: `test user ${i} exp1 name`,
+                    start: new Date(),
+                    end: new Date(),
+                    description: `test user ${i} exp1 description`,
+                },
+                {
+                    name: `test user ${i} exp2 name`,
+                    start: new Date(),
+                    end: new Date(),
+                    description: `test user ${i} exp2 description`,
+                }
+            ],
+            loc: {
+                type: 'Point',
+                coordinates: lonlat
+            }
+        };
+
+        users.push(user);
+    }
+    User.count().then(count => {
+        if (count < 30) {
+            User.insertMany(users);
+        }
+    }).then(() => {
+        console.log('populated users');
+    });
+}
+
 function createChatroomId(id1, id2) {    
     const compare = id1.localeCompare(id2);    
     if (compare === -1) {
@@ -182,5 +247,8 @@ module.exports = {
     exampleToken,
     url,
     signupUserAndGetSocket,
-    createChatroomId
+    createChatroomId,
+
+    clearUsers,
+    populateUsers
 };

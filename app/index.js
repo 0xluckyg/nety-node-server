@@ -14,6 +14,11 @@ const {getNetwork, updateLocation} = require('./server/network');
 const {logoutUser, blockUser, unblockUser, changeDiscoverableSetting} = require('./server/settings');
 const {getUserById, getUserByToken, updateUser} = require('./server/user');
 
+//DEV PURPOSES
+const {populateUsers, clearUsers} = require('./tests/seed');
+// clearUsers();
+populateUsers();
+
 const port = process.env.PORT;
 
 const app = express();

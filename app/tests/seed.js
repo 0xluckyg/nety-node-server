@@ -211,10 +211,10 @@ function populateUsers() {
     }
     User.count().then(count => {
         if (count < 30) {
-            User.insertMany(users);
+            User.insertMany(users).then(() => {
+                console.log('populated users');
+            });
         }
-    }).then(() => {
-        console.log('populated users');
     });
 }
 

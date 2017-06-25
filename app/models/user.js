@@ -48,11 +48,12 @@ const UserSchema = new mongoose.Schema({
             required: [true, 'Please provide a name']
         }
     },
-    age: {
-        type: Number,
-        min: [12, 'You must be older than 12'],
-        max: [120, 'Please provide a valid age'],
-        required: [true, 'Please provide an age']
+    education: {
+        type: String,
+        minlength: [1, 'Please provide where you studied'],
+        maxlength: [30, "Your school name can't be more than 200 characters long"],
+        default: null,
+        trim: true
     },
     status: {
         type: String,
@@ -64,7 +65,7 @@ const UserSchema = new mongoose.Schema({
     summary: {
         type: String,
         minlength: [1, 'Please provide a summary'],
-        maxlength: [300, "Your summary can't be more than 300 characters long"],
+        maxlength: [200, "Your summary can't be more than 300 characters long"],
         default: null,
         trim: true
     },

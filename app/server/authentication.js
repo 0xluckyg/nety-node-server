@@ -3,7 +3,7 @@ const _ = require('lodash');
 
 function signup(app) {
     app.post('/signup', function (req, res) {        
-        const body = _.pick(req.body, ['age', 'name', 'email', 'password']);        
+        const body = _.pick(req.body, ['name', 'email', 'password']);        
         const user = new User(body);
 
         user.save().then(() => {

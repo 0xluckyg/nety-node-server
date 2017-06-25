@@ -50,23 +50,13 @@ function signupTest() {
             .send(mock)
             .expect(400)
             .end(done);
-        });
-
-        it('should return validation error if age invalid', (done) => {
-            const mock = users[1];
-            request(server)
-            .post('/signup')
-            .send({age: 1, email: mock.email, password: mock.password, name: mock.name})
-            .expect(400)
-            .end(done);
-        });
+        });        
 
         it('should return validation error if name invalid', (done) => {
             const mock = users[1];
             request(server)
             .post('/signup')
-            .send({
-                age: mock.age, 
+            .send({                
                 email: mock.email, 
                 password: mock.password, 
                 name: {first: 'abcdefghijklmnopqrstuvwxyz', last: 'b'}})
@@ -78,7 +68,7 @@ function signupTest() {
             const mock = users[1];
             request(server)
             .post('/signup')
-            .send({age: mock.age, email: "aoweijogij", password: mock.password, name: mock.name})
+            .send({email: "aoweijogij", password: mock.password, name: mock.name})
             .expect(400)
             .end(done);
         });       
@@ -93,7 +83,7 @@ function loginTest() {
             User.remove({}).then(() => {
                 request(server)
                 .post('/signup')
-                .send({email: mock.email, password: mock.password, name: mock.name, age: mock.age})
+                .send({email: mock.email, password: mock.password, name: mock.name})
                 .end((err, res) => {                    
                     User.update({_id: res.body._id}, info).then(() => done());                    
                 });

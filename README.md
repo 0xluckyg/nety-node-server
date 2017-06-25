@@ -3,7 +3,6 @@
 ## /signup (post)
 
 > parameter: Json </br>
->> age: Number </br>
 >> name: String </br>
 >> email: String </br>
 >> password: String </br>

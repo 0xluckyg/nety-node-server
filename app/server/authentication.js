@@ -30,6 +30,7 @@ function login(app) {
                 res.header('x-auth', token).send(user);
             });
         }).catch(err => {
+            console.log('err',err);
             res.status(400).send(JSON.stringify(err));
         });
     });

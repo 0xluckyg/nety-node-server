@@ -23,14 +23,12 @@ function signup(app) {
 
 function login(app) {
     app.post('/login', function (req, res) {        
-        const body = _.pick(req.body, ['email', 'password']);
-        console.log('login',body);
+        const body = _.pick(req.body, ['email', 'password']);        
         User.findByCredentials(body.email, body.password).then(user => {
             return user.generateAuthToken().then(token => {
                 res.header('x-auth', token).send(user);
             });
         }).catch(err => {
-            console.log('err',err);
             res.status(400).send(JSON.stringify(err));
         });
     });

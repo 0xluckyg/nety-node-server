@@ -30,6 +30,10 @@ const io = socketIO(server);
 signup(app);
 login(app);
 
+app.get('/', (req, res) => {
+    res.send('works');
+});
+
 //Global authorization: required a token to connect to our socket
 io.use(authenticateToken);
 

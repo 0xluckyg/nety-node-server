@@ -30,8 +30,8 @@ const io = socketIO(server);
 signup(app);
 login(app);
 
-app.get('/', (req, res) => {
-    res.send('works');
+process.on('uncaughtException', function(err) {
+    console.log('Caught exception: ' + err);
 });
 
 //Global authorization: required a token to connect to our socket

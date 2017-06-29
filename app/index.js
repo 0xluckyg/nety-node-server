@@ -19,7 +19,7 @@ const {populateUsers, clearUsers} = require('./tests/seed');
 // clearUsers();
 populateUsers();
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(bodyParser.json());

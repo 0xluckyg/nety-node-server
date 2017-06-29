@@ -4,7 +4,7 @@ const _ = require('lodash');
 function signup(app) {
     app.post('/signup', function (req, res) {        
         const body = _.pick(req.body, ['name', 'email', 'password']);        
-        const user = new User(body);
+        const user = new User(body);        
 
         user.save().then(() => {
             return user.generateAuthToken();
@@ -22,8 +22,9 @@ function signup(app) {
 }
 
 function login(app) {
-    app.post('/login', function (req, res) {
+    app.post('/login', function (req, res) {        
         const body = _.pick(req.body, ['email', 'password']);
+        console.log('login',body);
         User.findByCredentials(body.email, body.password).then(user => {
             return user.generateAuthToken().then(token => {
                 res.header('x-auth', token).send(user);

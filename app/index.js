@@ -19,16 +19,28 @@ const {populateUsers, clearUsers} = require('./tests/seed');
 // clearUsers();
 populateUsers();
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(bodyParser.json());
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "PUT, GET, FETCH, POST, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Expose-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Credentials", "true");
+    next();
+});
 
 const server = http.createServer(app);
 const io = socketIO(server);
 
 signup(app);
 login(app);
+
+process.on('uncaughtException', function(err) {
+    console.log('Caught exception: ' + err);
+});
 
 //Global authorization: required a token to connect to our socket
 io.use(authenticateToken);

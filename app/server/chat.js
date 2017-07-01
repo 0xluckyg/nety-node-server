@@ -42,18 +42,23 @@ function getChatrooms(socket) {
             
         });                                
 
+        console.log('FROMID',fromIds);            
+        console.log('UNREAD',unreads);            
+
         return User.find({
                 _id: {$in: fromIds},
                 blocked: { $ne: socket.userId }   
             },            
             { profilePicture: 1, name: 1 }
-        ).then(users => {                                
+        ).then(users => {                          
+            console.log('USERS', users);
             //Sort from most recent updated again
             users.sort(function(user1,user2){
-                return fromIds.indexOf(user1._id.toString()) < fromIds.indexOf(user2._id.toString()) ? -1 : 1;
+                return fromIds.indexOf(user1._id.toString()) < fromIds.indexOf(user2._id.toString()) ? 1 : -1;
             });
+            console.log('USERS2', users);
 
-            const returnChatrooms = [];      
+            const returnChatrooms = [];                
             for (let i = 0; i < users.length; i++) {                
                 const returnChatroom = {
                     _id: chatrooms[i]._id,
@@ -68,9 +73,10 @@ function getChatrooms(socket) {
                 returnChatrooms.push(returnChatroom);
 
                 if (i === users.length - 1) {
+                    console.log('CHATROOMS', returnChatrooms);            
                     socket.emit('/self/getChatrooms/success', returnChatrooms);
                 }
-            }
+            }            
         });
     }
 }
@@ -115,7 +121,9 @@ function getMessages(socket) {
         .limit(50)
         .then(messages => {            
             if (messages) {                
-                socket.emit('/self/getMessages/success', messages);
+                socket.emit('/self/getMessages/success', {chatroomId: getM.chatroomId, messages});
+            } else {
+                socket.emit('/self/getMessages/success', {chatroomId: getM.chatroomId, messages: []});
             }
         }).catch(err => {            
             socket.emit('/self/getMessages/fail', err);
@@ -171,7 +179,8 @@ function sendMessage(socket, io) {
                 });                                
             });
 
-        }).catch(err => {                
+        }).catch(err => {       
+            console.log('WHY ERR',err);
             socket.emit('/self/sendMessage/fail', err);
         });
     });    

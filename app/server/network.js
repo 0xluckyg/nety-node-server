@@ -23,7 +23,7 @@ function getNetwork(socket) {
                     $maxDistance : maxDist
                 }
             },
-            _id: {$ne:socket.userId, $nin: user.blocked},            
+            _id: {$ne:socket.userId, $nin: user.blocked || []},            
             blocked: { $ne: socket.userId },
             discoverable: true
         },{ 

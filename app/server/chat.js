@@ -35,7 +35,7 @@ function getChatrooms(socket) {
         chatrooms.forEach(chatroom => {               
             //Adding other person's id and unread count. Only works with 2 people
             const index = _.findIndex(chatroom.users, {userId: new ObjectId(socket.userId)});            
-            const otherUser = chatroom.users[(index-1)*-1].userId;
+            const otherUser = chatroom.users[(index-1)*-1].userId.toString();
 
             fromIds.push(otherUser);
             unreads.push(chatroom.users[index].unread);
@@ -53,8 +53,10 @@ function getChatrooms(socket) {
         ).then(users => {                          
             console.log('USERS', users);
             //Sort from most recent updated again
-            users.sort(function(user1,user2){
-                return fromIds.indexOf(user1._id.toString()) < fromIds.indexOf(user2._id.toString()) ? 1 : -1;
+            users.sort((user1,user2) => {
+                console.log('IND', fromIds.indexOf(user1._id.toString()));
+                console.log('IND2', fromIds.indexOf(user2._id.toString()));
+                return fromIds.indexOf(user1._id.toString()) < fromIds.indexOf(user2._id.toString()) ? -1 : 1;
             });
             console.log('USERS2', users);
 

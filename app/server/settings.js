@@ -40,7 +40,7 @@ function unblockUser(socket) {
 }
 
 function changeDiscoverableSetting(socket, io) {
-    socket.on('/self/changeDiscoverable', discoverable => {
+    socket.on('/self/changeDiscoverable', discoverable => {        
         User.findOneAndUpdate(
             {_id: socket.userId},
             {$set: {discoverable}},

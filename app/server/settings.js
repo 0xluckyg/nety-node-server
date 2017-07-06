@@ -32,7 +32,7 @@ function unblockUser(socket) {
                 return socket.emit('/self/unblockUser/fail', 'no user');
             }
             socket.emit('/self/unblockUser/success');
-            socket.to(userToUnblockId).emit('/user/unblocked', user._id);
+            socket.to(userToUnblockId).emit('/user/unblocked', user);
         }).catch(err => {
             socket.emit('/self/unblockUser/fail', err);
         });

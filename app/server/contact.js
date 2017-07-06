@@ -11,12 +11,14 @@ function getContacts(socket) {
                 socket.emit('/criticalError', 'no user');
             }            
             User.find({                
-                _id: {$in: user.contacts, $nin: user.blocked},
-                blocked: { $ne: socket.userId },
-            }).sort(
+                    _id: {$in: user.contacts, $nin: user.blocked},
+                    blocked: { $ne: socket.userId },
+                }, 
+                {contacts: 0, blocked: 0, chatrooms: 0, chats: 0, authType:0, password: 0, token: 0}
+            ).sort(
                 {'name.first': 1}
             ).then(contacts => {                    
-                if (contacts) {                    
+                if (contacts) {                           
                     socket.emit('/self/getContacts/success', contacts);
                 }
             });
@@ -47,9 +49,9 @@ function addContact(socket) {
             if (count >= 2) {
                 return User.update(
                     { _id: socket.userId },
-                    { $push: { contacts: userToAddId } }
+                    { $addToSet: { contacts: userToAddId } }
                 ).then(() => {
-                    socket.emit('/self/addContact/success', userToAddId);
+                    findUser(userToAddId);
                 });
             } else {
                 throw Error('no approval from other person');
@@ -58,6 +60,15 @@ function addContact(socket) {
             socket.emit('/self/addContact/fail', err);
         });
     });
+
+    function findUser(_id) {
+        User.findOne(
+            {_id},            
+            {contacts: 0, blocked: 0, chatrooms: 0, chats: 0, authType:0, password: 0, token: 0}
+        ).then(user => {
+            socket.emit('/self/addContact/success', user);
+        });
+    }
 
     function createChatroomId(id1, id2) { 
         const compare = id1.localeCompare(id2);    

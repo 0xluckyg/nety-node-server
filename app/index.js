@@ -15,9 +15,9 @@ const {logoutUser, blockUser, unblockUser, changeDiscoverableSetting} = require(
 const {getUserById, getUserByToken, updateUser} = require('./server/user');
 
 //DEV PURPOSES
-const {populateUsers, clearUsers} = require('./tests/seed');
+// const {populateUsers, clearUsers} = require('./tests/seed');
 // clearUsers();
-populateUsers();
+// populateUsers();
 
 const port = process.env.PORT || 3000;
 

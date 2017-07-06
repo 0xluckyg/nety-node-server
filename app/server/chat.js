@@ -104,7 +104,7 @@ function readMessage(socket) {
             if (!returnChatroom) {                
                 throw Error('no chatroom');
             }
-            socket.emit('/self/readMessage/success');
+            socket.emit('/self/readMessage/success', chatroomId);
         }).catch(err => {
             socket.emit('/self/readMessage/fail', err);
         });

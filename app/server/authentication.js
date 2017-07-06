@@ -2,10 +2,14 @@ const {User} = require('../models/user');
 const _ = require('lodash');
 
 function signup(app) {
-    app.post('/signup', function (req, res) {        
+    app.post('/signup', function (req, res) {                
         const body = _.pick(req.body, ['name', 'email', 'password']);        
-        const user = new User(body);        
-
+        //DUMMY LOCATION
+        body.loc = {
+            type: 'Point',
+            coordinates: [-73.98767179999999,40.7285977]
+        };   
+        const user = new User(body);                
         user.save().then(() => {
             return user.generateAuthToken();
         }).then(token => {            
